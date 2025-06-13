@@ -97,6 +97,11 @@ struct HomeView: View {
                 showOnboarding = false
             }
         }
+        .onAppear {
+            if photoManager.authorizationStatus == .authorized || photoManager.authorizationStatus == .limited {
+                photoManager.fetchPhotos()
+            }
+        }
     }
     
     var headerView: some View {
