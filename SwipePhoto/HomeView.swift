@@ -337,6 +337,13 @@ struct MenuCardView: View {
                     if let month = item.month {
                         PolaroidStack(assets: month.assets, maxCount: 3, thumbSize: size * 0.28)
                             .padding(.top, size * 0.03)
+                    } else {
+                        // Placeholder skeleton
+                        RoundedRectangle(cornerRadius: size * 0.06)
+                            .fill(Color.gray.opacity(0.18))
+                            .frame(width: size * 0.82, height: size * 0.82)
+                            .shimmer()
+                            .padding(.top, size * 0.03)
                     }
                     Text(item.title)
                         .font(.system(size: size * 0.18, weight: .semibold, design: .serif))
@@ -456,5 +463,30 @@ struct PolaroidThumbnail: View {
                 self.image = img
             }
         }
+    }
+}
+
+// Shimmer effect for skeletons
+import SwiftUI
+struct Shimmer: ViewModifier {
+    @State private var phase: CGFloat = 0
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                LinearGradient(gradient: Gradient(colors: [Color.clear, Color.white.opacity(0.4), Color.clear]), startPoint: .leading, endPoint: .trailing)
+                    .rotationEffect(.degrees(30))
+                    .offset(x: phase * 350)
+                    .blendMode(.plusLighter)
+            )
+            .onAppear {
+                withAnimation(Animation.linear(duration: 1.2).repeatForever(autoreverses: false)) {
+                    phase = 1
+                }
+            }
+    }
+}
+extension View {
+    func shimmer() -> some View {
+        self.modifier(Shimmer())
     }
 } 
