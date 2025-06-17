@@ -496,7 +496,7 @@ struct PhotoCard: View {
         options.deliveryMode = .opportunistic
         options.isSynchronous = false
         options.isNetworkAccessAllowed = true
-        manager.requestImage(for: asset, targetSize: CGSize(width: 400, height: 400), contentMode: .aspectFit, options: options) { img, _ in
+        manager.requestImage(for: asset, targetSize: CGSize(width: 600, height: 600), contentMode: .aspectFit, options: options) { img, _ in
             self.image = img
         }
     }

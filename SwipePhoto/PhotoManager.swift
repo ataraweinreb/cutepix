@@ -37,9 +37,9 @@ class PhotoManager: ObservableObject {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
-            let fetchOptions = PHFetchOptions()
-            fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-            let assets = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        let assets = PHAsset.fetchAssets(with: .image, options: fetchOptions)
 
             var currentMonthKey: String? = nil
             var currentAssets: [PHAsset] = []
@@ -57,12 +57,12 @@ class PhotoManager: ObservableObject {
             DispatchQueue.main.async {
                 self.photoMonths = []
             }
-
-            assets.enumerateObjects { asset, _, _ in
+        
+        assets.enumerateObjects { asset, _, _ in
                 guard let asset = asset as? PHAsset else { return }
-                guard let date = asset.creationDate else { return }
-                let comps = Calendar.current.dateComponents([.year, .month], from: date)
-                let key = "\(comps.year!)-\(comps.month!)"
+            guard let date = asset.creationDate else { return }
+            let comps = Calendar.current.dateComponents([.year, .month], from: date)
+            let key = "\(comps.year!)-\(comps.month!)"
                 if key != currentMonthKey {
                     appendCurrentMonthIfNeeded()
                     currentMonthKey = key
@@ -72,7 +72,7 @@ class PhotoManager: ObservableObject {
             }
             // Append the last month
             appendCurrentMonthIfNeeded()
-            DispatchQueue.main.async {
+        DispatchQueue.main.async {
                 self.isLoading = false
             }
         }

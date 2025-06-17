@@ -47,8 +47,12 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color(red: 1.0, green: 0.74, blue: 0.83) // FFBCD3
-                    .ignoresSafeArea()
+                LinearGradient(
+                    gradient: Gradient(colors: [Color(red:0.13, green:0.09, blue:0.23), Color(red:0.18, green:0.13, blue:0.32), Color(red:0.22, green:0.09, blue:0.32), Color(red:0.13, green:0.13, blue:0.23), Color.purple.opacity(0.7), Color.blue.opacity(0.7), Color.pink.opacity(0.7)]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 VStack(spacing: 0) {
                     headerView
                         .offset(y: headerHidden ? -120 : 0)
@@ -94,9 +98,9 @@ struct HomeView: View {
                         ScrollOffsetReader()
                             .frame(height: 0)
                         let columns: [GridItem] = [
-                            GridItem(.adaptive(minimum: UIScreen.main.bounds.width > 600 ? 220 : 160, maximum: UIScreen.main.bounds.width > 600 ? 260 : 200), spacing: 16)
+                            GridItem(.adaptive(minimum: UIScreen.main.bounds.width > 600 ? 220 : 160, maximum: UIScreen.main.bounds.width > 600 ? 260 : 200), spacing: 18)
                         ]
-                        LazyVGrid(columns: columns, spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: 28) {
                                 if photoManager.isLoading && photoManager.photoMonths.isEmpty {
                                     ForEach(0..<10, id: \ .self) { index in
                                         ShimmerAlbumCard(gradient: rainbowGradients[index % rainbowGradients.count])
@@ -115,8 +119,8 @@ struct HomeView: View {
                                 }
                             }
                         }
-                        .padding(.vertical, 24)
-                        .padding(.horizontal, 16)
+                        .padding(.vertical, 40)
+                        .padding(.horizontal, 14)
                     }
                     .onPreferenceChange(ScrollOffsetKey.self) { value in
                         let delta = value - lastOffset
@@ -155,36 +159,26 @@ struct HomeView: View {
     }
     
     var headerView: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Color Clean")
-                    .font(.custom("Poppins-Bold", size: 48))
-                    .foregroundColor(.black)
-//                Text("choose a month to sort and delete photos.")
-//                    .font(.custom("Poppins-Regular", size: 18))
-//                    .foregroundColor(.black)
-                if photoManager.isLoading && photoManager.photoMonths.isEmpty {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
-                        .scaleEffect(1.2)
-                        .padding(.top, 4)
-                }
-            }
+        HStack(alignment: .center) {
+            Text("Color Clean")
+                .font(.custom("Poppins-Bold", size: 24))
+                .foregroundColor(.white)
+                .shadow(color: .black.opacity(0.7), radius: 3, x: 0, y: 1)
+                .padding(.leading, 4)
             Spacer()
             Button(action: { showSettings = true }) {
                 Image(systemName: "gearshape")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.black.opacity(0.8))
-                    .padding(8)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 38, height: 38)
             }
             .sheet(isPresented: $showSettings) {
                 SettingsMainView()
             }
         }
-        .padding(.top, 32)
-        .padding(.horizontal, 24)
-        .padding(.bottom, 12)
-        .background(Color.white.opacity(0.01))
+        .padding(.top, 4)
+        .padding(.bottom, 2)
+        .padding(.horizontal, 10)
     }
     
     var menuItems: [MenuItem] {
@@ -413,50 +407,55 @@ struct MenuCardView: View {
     
     var body: some View {
         GeometryReader { geo in
-            let size = min(geo.size.width, geo.size.height)
+            let size = min(geo.size.width, geo.size.height / 0.95)
             Button(action: action) {
-                VStack(alignment: .center, spacing: size * 0.05) {
-//                VStack(alignment: .center) {//VStack(alignment: .center, spacing: size * 0.05) {
-                    
-                    Text("\(emojiForMonth(item.title)) \(item.title)")
-                        .font(.custom("Poppins-Bold", size: 28))
-                        .foregroundColor(.black)
-                       // .kerning(1.5)
-                        //.textCase(item.style.textCase)
-                        .textCase(.lowercase)
-                        //.minimumScaleFactor(0.5)
-                        .lineLimit(1)
-                        .shadow(color: .white.opacity(0.4), radius: 0.5, x: 0, y: 0.5)
-                    
-                    if let month = item.month {
-                        PolaroidStack(assets: month.assets, maxCount: 3, thumbSize: size * 0.28, emoji: emojiForMonth(item.title))
-                            .padding(.top, size * 0.03)
+                ZStack {
+                    // Gradient background
+                    gradient
+                    // Subtle glassy overlay (very light)
+                    RoundedRectangle(cornerRadius: 36, style: .continuous)
+                        .fill(Color.white.opacity(0.08))
+                        .blur(radius: 0.5)
+                    VStack(alignment: .center, spacing: size * 0.06) {
+                        // Emoji and month name in a row
+                        HStack(spacing: size * 0.04) {
+                            Text(emojiForMonth(item.title))
+                                .font(.system(size: size * 0.10, weight: .regular))
+                                .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(1)
+                            Text(capitalizeFirst(item.title))
+                                .font(.custom("Poppins-SemiBold", size: size * 0.12))
+                                .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.7), radius: 3, x: 0, y: 1)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                        }
+                        // Polaroid stack
+                        if let month = item.month {
+                            PolaroidStack(assets: month.assets, maxCount: 3, thumbSize: size * 0.22, emoji: emojiForMonth(item.title))
+                                .padding(.top, size * 0.01)
+                                .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 4)
+                        }
+                        // Photo count
+                        Text("\(recentsCount) photos")
+                            .font(.custom("Poppins-Medium", size: size * 0.08))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                     }
-//                    Text("\(emojiForMonth(item.title)) \(item.title)")
-//                        .font(.custom("Poppins-Bold", size: 28))
-//                        .foregroundColor(.black)
-//                       // .kerning(1.5)
-//                        //.textCase(item.style.textCase)
-//                        .textCase(.lowercase)
-//                        //.minimumScaleFactor(0.5)
-//                        .lineLimit(1)
-//                        .shadow(color: .white.opacity(0.4), radius: 0.5, x: 0, y: 0.5)
-                    Text("\(recentsCount) photos")
-                        .font(.custom("Poppins-Regular", size: 18))
-                        .foregroundColor(.white)
-                       // .minimumScaleFactor(0.5)
-                        .lineLimit(1)
-                        .shadow(color: .black.opacity(0.15), radius: 0.5, x: 0, y: 0.5)
+                    .padding(.vertical, size * 0.06)
+                    .padding(.horizontal, size * 0.06)
                 }
-                .padding(size * 0.11)
-                .frame(width: geo.size.width, height: geo.size.height)
-                .background(gradient)
-                .cornerRadius(size * 0.16)
-                .shadow(color: Color.black.opacity(0.10), radius: size * 0.06, x: 0, y: size * 0.02)
+                .frame(width: geo.size.width, height: geo.size.width * 0.95)
+                .background(Color.clear)
+                .cornerRadius(36)
+                .shadow(color: Color.black.opacity(0.18), radius: 22, x: 0, y: 10)
             }
             .buttonStyle(PlainButtonStyle())
         }
-        .aspectRatio(1, contentMode: .fit)
+        .aspectRatio(1.05, contentMode: .fit)
     }
     
     func emojiForMonth(_ title: String) -> String {
@@ -474,6 +473,12 @@ struct MenuCardView: View {
         if upper.contains("NOV") { return "🦃" }
         if upper.contains("DEC") { return "🎅" }
         return "📅"
+    }
+    
+    // Helper function for capitalizing only the first letter
+    func capitalizeFirst(_ str: String) -> String {
+        guard let first = str.first else { return str }
+        return first.uppercased() + str.dropFirst().lowercased()
     }
 }
 
