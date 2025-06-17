@@ -1,75 +1,10 @@
-//import SwiftUI
-//import AVKit
-//
-//struct OnboardingView: View {
-//    var onFinish: () -> Void
-//
-//    // Replace "onboarding" with your video file name (without extension)
-//    private var player: AVPlayer? {
-//        if let url = Bundle.main.url(forResource: "onboarding", withExtension: "MP4") {
-//            return AVPlayer(url: url)
-//        }
-//        return nil
-//    }
-//
-//    var body: some View {
-//        ZStack {
-//            LinearGradient(
-//                gradient: Gradient(colors: [Color.orange, Color.pink]),
-//                startPoint: .top,
-//                endPoint: .bottom
-//            )
-//            .ignoresSafeArea()
-//
-//            VStack(spacing: 32) {
-//                Spacer()
-//                Text("Welcome to SwipeWipe!")
-//                    .font(.system(size: 40, weight: .bold, design: .serif))
-//                    .foregroundColor(.white)
-//                    .multilineTextAlignment(.center)
-//                    .padding(.horizontal, 24)
-//
-//                if let player = player {
-//                    VideoPlayer(player: player)
-//                        .frame(height: 240)
-//                        .cornerRadius(20)
-//                        .padding(.horizontal, 24)
-//                        .onAppear { player.play() }
-//                } else {
-//                    Text("Video not found.")
-//                        .foregroundColor(.white)
-//                }
-//
-//                Text("Swipe through your photos, keep the best, and delete the rest. Let's get started!")
-//                    .font(.title2)
-//                    .foregroundColor(.white.opacity(0.9))
-//                    .multilineTextAlignment(.center)
-//                    .padding(.horizontal, 32)
-//
-//                Spacer()
-//
-//                Button(action: onFinish) {
-//                    Text("Get Started")
-//                        .font(.title2.bold())
-//                        .foregroundColor(.orange)
-//                        .padding(.vertical, 16)
-//                        .padding(.horizontal, 48)
-//                        .background(Color.white)
-//                        .cornerRadius(16)
-//                        .shadow(radius: 8)
-//                }
-//                Spacer()
-//            }
-//        }
-//    }
-//}
-
 import SwiftUI
 import AVKit
 
 struct OnboardingView: View {
     var onFinish: () -> Void
     @StateObject private var playerHolder = PlayerHolder()
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ZStack {
@@ -104,7 +39,15 @@ struct OnboardingView: View {
 
                 Spacer()
 
-                Button(action: onFinish) {
+                Button(action: {
+                    // Stop video playback before dismissing
+                    playerHolder.player.pause()
+                    playerHolder.player.seek(to: .zero)
+                    // Use async to ensure video cleanup happens before dismissal
+                    DispatchQueue.main.async {
+                        onFinish()
+                    }
+                }) {
                     Text("Get Started")
                         .font(.title2.bold())
                         .foregroundColor(.orange)
@@ -123,6 +66,7 @@ struct OnboardingView: View {
 // Helper class to manage AVPlayer and looping
 class PlayerHolder: ObservableObject {
     let player: AVPlayer
+    private var observer: NSObjectProtocol?
 
     init() {
         if let url = Bundle.main.url(forResource: "onboarding", withExtension: "MP4") {
@@ -135,7 +79,7 @@ class PlayerHolder: ObservableObject {
     func playAndLoop() {
         player.seek(to: .zero)
         player.play()
-        NotificationCenter.default.addObserver(
+        observer = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: player.currentItem,
             queue: .main
@@ -143,6 +87,13 @@ class PlayerHolder: ObservableObject {
             self?.player.seek(to: .zero)
             self?.player.play()
         }
+    }
+    
+    deinit {
+        if let observer = observer {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        player.pause()
     }
 }
 

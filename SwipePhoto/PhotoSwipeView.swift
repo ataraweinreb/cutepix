@@ -4,6 +4,7 @@ import PhotosUI
 struct PhotoSwipeView: View {
     let month: PhotoMonth
     var onBatchDelete: (() -> Void)? = nil
+    @ObservedObject var photoManager: PhotoManager
     @Environment(\.presentationMode) var presentationMode
     @State private var currentIndex = 0
     @State private var offset: CGSize = .zero
@@ -49,14 +50,18 @@ struct PhotoSwipeView: View {
                 Spacer()
                 
                 if isDeleting {
+                    Color.black.opacity(0.7).ignoresSafeArea()
                     VStack(spacing: 20) {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .scaleEffect(2)
-                        Text("Deleting \(assetsToDelete.count) photos...")
+                        Text("Deleting photos...")
                             .foregroundColor(.white)
                             .font(.title2)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
+                    .allowsHitTesting(true)
                 } else if month.assets.isEmpty {
                     Text("No photos in this month!")
                         .font(.title2)
@@ -221,7 +226,7 @@ struct PhotoSwipeView: View {
                     withAnimation(.easeIn(duration: 0.3)) {
                         showConfetti = true
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    DispatchQueue.main.asyncAfter(deadline: .now()) {
                         presentationMode.wrappedValue.dismiss()
                         onBatchDelete?()
                     }
@@ -232,6 +237,7 @@ struct PhotoSwipeView: View {
             }
         }
         .sheet(isPresented: $showPaywall, onDismiss: {
+            // Only dismiss parent if user is NOT premium after paywall closes
             if !isPremium {
                 presentationMode.wrappedValue.dismiss()
             }
@@ -241,6 +247,7 @@ struct PhotoSwipeView: View {
                 showPaywall = false
                 totalSwipes = 0
                 hasSeenPaywall = false
+                // Do NOT dismiss parent here; user stays on swipe view
             })
         }
         .onAppear {
@@ -287,14 +294,37 @@ struct PhotoSwipeView: View {
         }
     }
     
-    func deleteBatch(assets: [PHAsset], completion: @escaping () -> Void) {
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.deleteAssets(assets as NSArray)
-        }, completionHandler: { success, error in
+    private func deleteBatch(assets: [PHAsset], completion: @escaping () -> Void) {
+        PHPhotoLibrary.shared().performChanges {
+            PHAssetChangeRequest.deleteAssets(assets as NSFastEnumeration)
+        } completionHandler: { success, error in
             DispatchQueue.main.async {
-                completion()
+                if success {
+                    // Update current state instead of reloading
+                    if let currentMonth = photoManager.photoMonths.first(where: { $0.assets.contains(where: { assets.contains($0) }) }) {
+                        // Remove deleted assets from the current month
+                        let updatedAssets = currentMonth.assets.filter { !assets.contains($0) }
+                        if let monthIndex = photoManager.photoMonths.firstIndex(where: { $0.month == currentMonth.month && $0.year == currentMonth.year }) {
+                            if updatedAssets.isEmpty {
+                                // Remove the month if it's empty
+                                photoManager.photoMonths.remove(at: monthIndex)
+                            } else {
+                                // Update the month with remaining assets
+                                photoManager.photoMonths[monthIndex] = PhotoMonth(
+                                    month: currentMonth.month,
+                                    year: currentMonth.year,
+                                    assets: updatedAssets
+                                )
+                            }
+                        }
+                    }
+                    completion()
+                } else if let error = error {
+                    print("Error deleting photos: \(error)")
+                    completion()
+                }
             }
-        })
+        }
     }
 
     // Button tap helpers

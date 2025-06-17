@@ -10,6 +10,9 @@ struct PaywallView: View {
     @State private var purchaseError: String?
     @AppStorage("isPremium") private var isPremium: Bool = false
     @StateObject private var playerHolder = PlayerHolder()
+    // Coupon code state
+    @State private var couponCode: String = ""
+    @State private var couponError: String?
 
     // Use placeholder product IDs for now
     let weeklyProductID = "com.example.premium.weekly"
@@ -78,6 +81,43 @@ struct PaywallView: View {
                             .padding(.top, 2)
                         }
                         .padding(.bottom, 14)
+                        // Coupon code unlock (moved above purchase buttons)
+                        VStack(spacing: 8) {
+                            TextField("Enter coupon code", text: $couponCode)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .padding(.top, 8)
+                            Button(action: {
+                                let validCode = "SWIPEFREE" // Set your coupon code here
+                                if couponCode.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == validCode {
+                                    isPremium = true
+                                    couponError = nil
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                        if let onUnlock = onUnlock {
+                                            onUnlock()
+                                        } else {
+                                            dismiss()
+                                        }
+                                    }
+                                } else {
+                                    couponError = "Invalid coupon code."
+                                }
+                            }) {
+                                Text("Unlock with Coupon")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding(.vertical, 10)
+                                    .padding(.horizontal, 24)
+                                    .background(Color.green)
+                                    .cornerRadius(12)
+                            }
+                            if let couponError = couponError {
+                                Text(couponError)
+                                    .foregroundColor(.red)
+                                    .font(.footnote)
+                            }
+                        }
                         // Two big buttons for plans
                         VStack(spacing: 16) {
                             Button(action: { purchasePlan(weekly: true) }) {
@@ -193,6 +233,10 @@ struct PaywallView: View {
             }
             .safeAreaInset(edge: .bottom) { Spacer().frame(height: 16) }
             .safeAreaInset(edge: .top) { Spacer().frame(height: 0) }
+            // Add keyboard dismiss gesture to the outer ZStack
+            .gesture(
+                TapGesture().onEnded { UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) }
+            )
         }
         .task {
             await loadProducts()

@@ -16,10 +16,25 @@ struct HomeView: View {
     @AppStorage("totalSwipes") private var totalSwipes: Int = 0
     @AppStorage("hasSeenPaywall") private var hasSeenPaywall: Bool = false
     
+    let rainbowGradients: [LinearGradient] = [
+        // Bright, contrasty pink
+        LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.2, blue: 0.7), Color(red: 1.0, green: 0.55, blue: 0.85)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // Bright orange
+        LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.6, blue: 0.0), Color.orange]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // Bright yellow
+        LinearGradient(gradient: Gradient(colors: [Color.yellow, Color(red: 1.0, green: 0.9, blue: 0.2)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // Bright green
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 1.0, blue: 0.5), Color.green]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // Bright blue
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 0.6, blue: 1.0), Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // Bright purple
+        LinearGradient(gradient: Gradient(colors: [Color.purple, Color(red: 0.6, green: 0.2, blue: 1.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+    ]
+    
     var body: some View {
         NavigationView {
             ZStack {
-                LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.45, blue: 0.0), Color(red: 1.0, green: 0.24, blue: 0.49)]), startPoint: .top, endPoint: .bottom)
+                Color(red: 1.0, green: 0.74, blue: 0.83) // FFBCD3
                     .ignoresSafeArea()
                 VStack(spacing: 0) {
                     headerView
@@ -34,13 +49,19 @@ struct HomeView: View {
                             GridItem(.adaptive(minimum: UIScreen.main.bounds.width > 600 ? 220 : 160, maximum: UIScreen.main.bounds.width > 600 ? 260 : 200), spacing: 16)
                         ]
                         LazyVGrid(columns: columns, spacing: 16) {
-                            ForEach(menuItems, id: \ .id) { item in
-                                MenuCardView(item: item, recentsCount: item.month?.assets.count ?? 0) {
-                                    if let month = item.month, !month.assets.isEmpty {
-                                        if isPremium || (totalSwipes < 3 && !hasSeenPaywall) {
-                                            selectedMonth = month
-                                        } else {
-                                            showPaywall = true
+                            if photoManager.isLoading && photoManager.photoMonths.isEmpty {
+                                ForEach(0..<10, id: \ .self) { index in
+                                    ShimmerAlbumCard(gradient: rainbowGradients[index % rainbowGradients.count])
+                                }
+                            } else {
+                                ForEach(Array(menuItems.enumerated()), id: \ .element.id) { index, item in
+                                    MenuCardView(item: item, recentsCount: item.month?.assets.count ?? 0, gradient: rainbowGradients[index % rainbowGradients.count]) {
+                                        if let month = item.month, !month.assets.isEmpty {
+                                            if isPremium || (totalSwipes < 3 && !hasSeenPaywall) {
+                                                selectedMonth = month
+                                            } else {
+                                                showPaywall = true
+                                            }
                                         }
                                     }
                                 }
@@ -62,24 +83,9 @@ struct HomeView: View {
                     }
                     .sheet(item: $selectedMonth) { month in
                         PhotoSwipeView(month: month, onBatchDelete: {
-                            photoManager.fetchPhotos()
-                        })
+                            // Removed redundant photoManager.fetchPhotos() call
+                        }, photoManager: photoManager)
                     }
-                }
-                
-                if photoManager.isLoading {
-                    Color.black.opacity(0.4)
-                        .ignoresSafeArea()
-                        .overlay(
-                            VStack(spacing: 16) {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .scaleEffect(2)
-                                Text("Loading Photos...")
-                                    .font(.title2)
-                                    .foregroundColor(.white)
-                            }
-                        )
                 }
             }
         }
@@ -97,34 +103,50 @@ struct HomeView: View {
                 showOnboarding = false
             }
         }
-        .onAppear {
-            if photoManager.authorizationStatus == .authorized || photoManager.authorizationStatus == .limited {
-                photoManager.fetchPhotos()
-            }
-        }
     }
     
     var headerView: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Color Clean")
-                    .font(.system(size: 36, weight: .bold, design: .serif))
-                    .overlay(
-                        LinearGradient(
-                            colors: [
-                                .red, .orange, .yellow, .green, .blue, .indigo, .purple
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                ZStack {
+                    Text("Color Clean")
+                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .foregroundColor(.clear)
+                        .overlay(
+                            LinearGradient(
+                                colors: [
+                                    .red, .orange, .yellow, .green, .blue, .purple
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            .mask(
+                                Text("Color Clean")
+                                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                            )
                         )
-                        .mask(
+                        .overlay(
                             Text("Color Clean")
-                                .font(.system(size: 36, weight: .bold, design: .serif))
+                                .font(.system(size: 48, weight: .bold, design: .rounded))
+                                .foregroundColor(.black)
+                                .opacity(1)
+                                .offset(x: 0, y: 0)
+                                .overlay(
+                                    Text("Color Clean")
+                                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                                       // .stroke(Color.black, lineWidth: 4)
+                                )
                         )
-                    )
+                }
                 Text("choose a month to sort and delete photos.")
                     .font(.subheadline)
                     .foregroundColor(.black)
+                if photoManager.isLoading && photoManager.photoMonths.isEmpty {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                        .scaleEffect(1.2)
+                        .padding(.top, 4)
+                }
             }
             Spacer()
             Button(action: { showSettings = true }) {
@@ -279,6 +301,49 @@ struct HomeView: View {
             textCase: baseTextCase
         )
     }
+    
+    func gradientForMonth(_ title: String) -> LinearGradient {
+        let upper = title.uppercased()
+        if upper.contains("FEB") {
+            // Red/Pink
+            return LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.56, blue: 0.56), Color(red: 1.0, green: 0.74, blue: 0.83)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("MAR") {
+            // Orange
+            return LinearGradient(gradient: Gradient(colors: [Color.orange, Color.yellow]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("APR") {
+            // Yellow
+            return LinearGradient(gradient: Gradient(colors: [Color.yellow, Color(red: 1.0, green: 0.95, blue: 0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("MAY") {
+            // Green
+            return LinearGradient(gradient: Gradient(colors: [Color.green, Color(red: 0.36, green: 0.98, blue: 0.56)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("JUN") {
+            // Blue
+            return LinearGradient(gradient: Gradient(colors: [Color.blue, Color(red: 0.36, green: 0.67, blue: 1.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("JAN") {
+            // Purple/Blue
+            return LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else {
+            // Default
+            return LinearGradient(gradient: Gradient(colors: [Color.pink, Color.orange]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+    }
+    
+    func emojiForMonth(_ title: String) -> String {
+        let upper = title.uppercased()
+        if upper.contains("JAN") { return "❄️" }
+        if upper.contains("FEB") { return "💖" }
+        if upper.contains("MAR") { return "🍀" }
+        if upper.contains("APR") { return "🐣" }
+        if upper.contains("MAY") { return "🌺" }
+        if upper.contains("JUN") { return "🏳️‍🌈" }
+        if upper.contains("JUL") { return "🇺🇸" }
+        if upper.contains("AUG") { return "⛱️" }
+        if upper.contains("SEP") { return "🍁" }
+        if upper.contains("OCT") { return "🎃" }
+        if upper.contains("NOV") { return "🦃" }
+        if upper.contains("DEC") { return "🎅" }
+        return "📅"
+    }
 }
 
 struct MenuCardStyle {
@@ -301,7 +366,52 @@ struct MenuItem: Identifiable {
 
 struct SettingsView: View {
     var body: some View {
-        VStack { Spacer(); Text("Settings").font(.largeTitle); Spacer() }
+        VStack(spacing: 24) {
+            Spacer()
+            Text("Settings").font(.largeTitle)
+            VStack(alignment: .leading, spacing: 16) {
+                Text("FAQ")
+                    .font(.title2.bold())
+                    .padding(.bottom, 4)
+                Group {
+                    Text("**What is this app?**")
+                        .font(.headline)
+                    Text("SwipePhoto helps you quickly clean up your photo library by swiping through your photos, Tinder-style. Organize by month, swipe right to keep, left to delete, and enjoy a fast, colorful, and private experience.")
+                        .font(.subheadline)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundColor(.secondary)
+                    Text("**Are my photos private?**")
+                        .font(.headline)
+                    Text("Yes! Your photos never leave your device. All processing and sorting happens locally on your phone. We do not collect or upload any of your photos.")
+                        .font(.subheadline)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundColor(.secondary)
+                    Text("**How do I unsubscribe or manage my subscription?**")
+                        .font(.headline)
+                    Text("Tap the 'Manage Subscription' button below to open the App Store and manage or cancel your subscription at any time.")
+                        .font(.subheadline)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(16)
+            Button(action: {
+                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                    UIApplication.shared.open(url)
+                }
+            }) {
+                Text("Manage Subscription")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.orange)
+                    .cornerRadius(12)
+            }
+            Spacer()
+        }
+        .padding(.horizontal)
     }
 }
 
@@ -327,6 +437,7 @@ import Photos
 struct MenuCardView: View {
     let item: MenuItem
     var recentsCount: Int = 0
+    var gradient: LinearGradient
     var action: () -> Void
     
     var body: some View {
@@ -335,32 +446,25 @@ struct MenuCardView: View {
             Button(action: action) {
                 VStack(alignment: .center, spacing: size * 0.05) {
                     if let month = item.month {
-                        PolaroidStack(assets: month.assets, maxCount: 3, thumbSize: size * 0.28)
-                            .padding(.top, size * 0.03)
-                    } else {
-                        // Placeholder skeleton
-                        RoundedRectangle(cornerRadius: size * 0.06)
-                            .fill(Color.gray.opacity(0.18))
-                            .frame(width: size * 0.82, height: size * 0.82)
-                            .shimmer()
+                        PolaroidStack(assets: month.assets, maxCount: 3, thumbSize: size * 0.28, emoji: emojiForMonth(item.title))
                             .padding(.top, size * 0.03)
                     }
-                    Text(item.title)
-                        .font(.system(size: size * 0.18, weight: .semibold, design: .serif))
+                    Text("\(emojiForMonth(item.title)) \(item.title)")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundColor(.black)
                         .kerning(1.5)
                         .textCase(item.style.textCase)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
                     Text("\(recentsCount) photos")
-                        .font(.system(size: size * 0.10, weight: .regular))
-                        .foregroundColor(.gray)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
                 }
                 .padding(size * 0.11)
                 .frame(width: geo.size.width, height: geo.size.height)
-                .background(item.style.background)
+                .background(gradient)
                 .cornerRadius(size * 0.16)
                 .shadow(color: Color.black.opacity(0.10), radius: size * 0.06, x: 0, y: size * 0.02)
             }
@@ -368,12 +472,30 @@ struct MenuCardView: View {
         }
         .aspectRatio(1, contentMode: .fit)
     }
+    
+    func emojiForMonth(_ title: String) -> String {
+        let upper = title.uppercased()
+        if upper.contains("JAN") { return "❄️" }
+        if upper.contains("FEB") { return "💖" }
+        if upper.contains("MAR") { return "🍀" }
+        if upper.contains("APR") { return "🐣" }
+        if upper.contains("MAY") { return "🌺" }
+        if upper.contains("JUN") { return "🏳️‍🌈" }
+        if upper.contains("JUL") { return "🇺🇸" }
+        if upper.contains("AUG") { return "⛱️" }
+        if upper.contains("SEP") { return "🍁" }
+        if upper.contains("OCT") { return "🎃" }
+        if upper.contains("NOV") { return "🦃" }
+        if upper.contains("DEC") { return "🎅" }
+        return "📅"
+    }
 }
 
 struct PolaroidStack: View {
     let assets: [PHAsset]
     let maxCount: Int
     var thumbSize: CGFloat = 64
+    var emoji: String? = nil
 
     var body: some View {
         let indices = polaroidIndices(assetCount: assets.count, maxCount: maxCount)
@@ -416,7 +538,7 @@ struct PolaroidThumbnail: View {
                     if let img = image {
                         Image(uiImage: img)
                             .resizable()
-                            .aspectRatio(1, contentMode: .fill)
+                            .scaledToFill()
                             .frame(width: size * 0.82, height: size * 0.82)
                             .clipped()
                     } else {
@@ -466,27 +588,63 @@ struct PolaroidThumbnail: View {
     }
 }
 
-// Shimmer effect for skeletons
-import SwiftUI
-struct Shimmer: ViewModifier {
+struct ShimmerAlbumCard: View {
+    var gradient: LinearGradient
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Simulate the polaroid/photo stack
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.gray.opacity(0.25))
+                .frame(height: 80)
+                .shimmering()
+            // Simulate the album title
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.gray.opacity(0.25))
+                .frame(width: 100, height: 20)
+                .shimmering()
+            // Simulate the photo count
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.gray.opacity(0.18))
+                .frame(width: 60, height: 16)
+                .shimmering()
+            Spacer()
+        }
+        .padding()
+        .frame(maxWidth: .infinity, minHeight: 160, maxHeight: 180)
+        .background(gradient)
+        .cornerRadius(32)
+        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+    }
+}
+
+extension View {
+    func shimmering() -> some View {
+        self
+            .modifier(ShimmerModifier())
+    }
+}
+
+struct ShimmerModifier: ViewModifier {
     @State private var phase: CGFloat = 0
     func body(content: Content) -> some View {
         content
             .overlay(
-                LinearGradient(gradient: Gradient(colors: [Color.clear, Color.white.opacity(0.4), Color.clear]), startPoint: .leading, endPoint: .trailing)
-                    .rotationEffect(.degrees(30))
-                    .offset(x: phase * 350)
-                    .blendMode(.plusLighter)
-            )
-            .onAppear {
-                withAnimation(Animation.linear(duration: 1.2).repeatForever(autoreverses: false)) {
-                    phase = 1
+                GeometryReader { geo in
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.clear, Color.white.opacity(0.6), Color.clear]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .rotationEffect(.degrees(30))
+                        .offset(x: -geo.size.width * 1.5 + phase * geo.size.width * 3)
+                        .frame(width: geo.size.width * 1.5, height: geo.size.height)
+                        .clipped()
+                        .animation(Animation.linear(duration: 1.2).repeatForever(autoreverses: false), value: phase)
+                        .onAppear { phase = 1 }
                 }
-            }
-    }
-}
-extension View {
-    func shimmer() -> some View {
-        self.modifier(Shimmer())
+            )
     }
 } 
