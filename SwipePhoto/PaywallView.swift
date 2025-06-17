@@ -1,6 +1,7 @@
 import SwiftUI
 import StoreKit
-import AVKit
+import SDWebImageSwiftUI
+//import SettingsFAQView
 
 struct PaywallView: View {
     var onUnlock: (() -> Void)? = nil
@@ -9,7 +10,10 @@ struct PaywallView: View {
     @State private var isPurchasing = false
     @State private var purchaseError: String?
     @AppStorage("isPremium") private var isPremium: Bool = false
-    @StateObject private var playerHolder = PlayerHolder()
+    @State private var currentIndex = 0
+    @State private var offset: CGSize = .zero
+    @GestureState private var dragState = CGSize.zero
+    
     // Coupon code state
     @State private var couponCode: String = ""
     @State private var couponError: String?
@@ -18,225 +22,184 @@ struct PaywallView: View {
     let weeklyProductID = "com.example.premium.weekly"
     let yearlyProductID = "com.example.premium.yearly"
 
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [Color(red: 1.0, green: 0.82, blue: 0.72), Color.pink]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+    let gifUrls = [
+        "https://media.giphy.com/media/3o7aTvhUAeRLAVx8vm/giphy.gif",
+        "https://media.giphy.com/media/TydZAW0DVCbGE/giphy.gif",
+        "https://media.giphy.com/media/ydttw7Bg2tHVHecInE/giphy.gif"
+    ]
+    
+    let captions = [
+        "Unlock unlimited swipes! ✨",
+        "Keep your favorite memories 💖",
+        "Clean up your camera roll 🧼"
+    ]
 
+    @State private var showFAQ = false
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Color(red: 1.0, green: 0.74, blue: 0.83) // FFBCD3
+                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                // GIF at the top (smaller)
+                WebImage(url: URL(string: "https://media.giphy.com/media/XMmf6i3xuKZiPMvNZe/giphy.gif"))
+                    .resizable()
+                    .indicator(.activity)
+                    .scaledToFit()
+                    .frame(height: 110)
+                    .cornerRadius(18)
+                    .shadow(color: Color.black.opacity(0.13), radius: 8, y: 3)
+                    .padding(.top, 32)
+                    .padding(.bottom, 8)
+
+                // Title
+                Text("Unlock Premium 👑")
+                    .font(.system(size: 38, weight: .bold, design: .rounded))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 8)
+                    .padding(.bottom, 2)
+
+                // Playful subtitle
+                Text("Get unlimited swipes and deletes")
+                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .foregroundColor(.black.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 18)
+
+                // Cancel anytime row (replaces FAQ/data row)
+                HStack(alignment: .center, spacing: 12) {
+                    Image(systemName: "arrow.2.circlepath")
+                        .foregroundColor(Color.purple)
+                        .font(.system(size: 18))
+                    Text("Auto-renewable. Cancel anytime.")
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundColor(.black.opacity(0.7))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                .padding(.horizontal, 18)
+                .padding(.bottom, 24)
+
+                // Subscription Options with pulsing animation
+                VStack(spacing: 20) {
+                    PulsingButton(
+                        title: "Try For Free",
+                        subtitle: "3 days free, then " + (products.first(where: { $0.id == weeklyProductID })?.displayPrice ?? "$9.99/week"),
+                        gradient: LinearGradient(
+                            gradient: Gradient(colors: [Color(red: 0.95, green: 0.2, blue: 0.7), Color(red: 1.0, green: 0.5, blue: 0.4)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        action: { purchasePlan(weekly: true) },
+                        disabled: isPurchasing || products.isEmpty
+                    )
+                    PulsingButton(
+                        title: "Subscribe for " + (products.first(where: { $0.id == yearlyProductID })?.displayPrice ?? "$39.99/year"),
+                        subtitle: "1 year, best value",
+                        gradient: LinearGradient(
+                            gradient: Gradient(colors: [Color(red: 0.6, green: 0.3, blue: 0.9), Color(red: 0.4, green: 0.5, blue: 0.9)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        action: { purchasePlan(weekly: false) },
+                        disabled: isPurchasing || products.isEmpty
+                    )
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 8)
+
+                // Error
+                if let error = purchaseError {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(nil)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 8)
+                }
+
+                // Move up the 'What makes us different?' section
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("What makes us different?")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(.black)
+                        .padding(.bottom, 2)
+                    HStack(alignment: .top, spacing: 10) {
+                        Text("💖")
+                            .font(.system(size: 22))
+                        Text("All photos and data stay on your device and are 100% private")
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .foregroundColor(.black.opacity(0.8))
+                    }
+                    HStack(alignment: .top, spacing: 10) {
+                        Text("💜")
+                            .font(.system(size: 22))
+                        Text("Significantly cheaper than most competitor apps")
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .foregroundColor(.black.opacity(0.8))
+                    }
+                    HStack(alignment: .top, spacing: 10) {
+                        Text("💙")
+                            .font(.system(size: 22))
+                        Text("Built for girls, by girls. Help support women in tech!")
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .foregroundColor(.black.opacity(0.8))
+                    }
+                }
+                .padding(.horizontal, 28)
+                .padding(.top, 18)
+                .padding(.bottom, 18)
+            }
+            // X button in the top corner, overlayed
+            Button(action: { dismiss() }) {
+                Image(systemName: "xmark")
+                    .font(.title2.bold())
+                    .foregroundColor(.black.opacity(0.7))
+                    .padding(8)
+                    .background(Color.white.opacity(0.85))
+                    .clipShape(Circle())
+                    .shadow(radius: 2, y: 1)
+            }
+            .padding(.top, 18)
+            .padding(.leading, 18)
+
+            // Restore, FAQ, Terms Of Use links at the bottom
             VStack {
-                // Dismiss button always visible at top left
+                Spacer()
                 HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(.title2.bold())
-                            .foregroundColor(.black.opacity(0.7))
-                            .padding(8)
-                            .background(Color.white.opacity(0.85))
-                            .clipShape(Circle())
-                            .shadow(radius: 2, y: 1)
+                    Button(action: restore) {
+                        Text("Restore")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .underline()
+                            .foregroundColor(.black.opacity(0.35))
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer()
-                }
-                .padding(.top, 18)
-                .padding(.leading, 18)
-                Spacer(minLength: 0)
-                // Centered solid card
-                HStack {
-                    Spacer(minLength: 0)
-                    VStack(spacing: 0) {
-                        VStack(spacing: 0) {
-                            VideoPlayerView(player: playerHolder.player)
-                                .frame(width: 160, height: 160)
-                                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                                .shadow(color: .black.opacity(0.10), radius: 12, x: 0, y: 6)
-                                .padding(.top, 8)
-                                .padding(.bottom, 10)
-                                .onAppear { playerHolder.playAndLoop() }
-                            Text("Unlock Premium")
-                                .font(.system(size: 32, weight: .bold, design: .serif))
-                                .foregroundColor(.black)
-                                .minimumScaleFactor(0.8)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(nil)
-                                .padding(.horizontal, 8)
-                                .padding(.top, 2)
-                            Text("Get unlimited swipes, enhance your photos & more.")
-                                .font(.title3)
-                                .foregroundColor(.black.opacity(0.85))
-                                .multilineTextAlignment(.center)
-                                .lineLimit(nil)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .padding(.horizontal, 8)
-                                .padding(.top, 2)
-                            Button(action: { /* maybe link to FAQ */ }) {
-                                Text("Cancel anytime.")
-                                    .font(.body)
-                                    .foregroundColor(Color.purple)
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.top, 2)
-                        }
-                        .padding(.bottom, 14)
-                        // Coupon code unlock (moved above purchase buttons)
-                        VStack(spacing: 8) {
-                            TextField("Enter coupon code", text: $couponCode)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .padding(.top, 8)
-                            Button(action: {
-                                let validCode = "SWIPEFREE" // Set your coupon code here
-                                if couponCode.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == validCode {
-                                    isPremium = true
-                                    couponError = nil
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                        if let onUnlock = onUnlock {
-                                            onUnlock()
-                                        } else {
-                                            dismiss()
-                                        }
-                                    }
-                                } else {
-                                    couponError = "Invalid coupon code."
-                                }
-                            }) {
-                                Text("Unlock with Coupon")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding(.vertical, 10)
-                                    .padding(.horizontal, 24)
-                                    .background(Color.green)
-                                    .cornerRadius(12)
-                            }
-                            if let couponError = couponError {
-                                Text(couponError)
-                                    .foregroundColor(.red)
-                                    .font(.footnote)
-                            }
-                        }
-                        // Two big buttons for plans
-                        VStack(spacing: 16) {
-                            Button(action: { purchasePlan(weekly: true) }) {
-                                VStack(spacing: 2) {
-                                    Text("Try For Free")
-                                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                                        .foregroundColor(.orange)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 16)
-                                        .background(Color.white)
-                                        .cornerRadius(18)
-                                        .shadow(color: Color.orange.opacity(0.10), radius: 6, y: 2)
-                                    Text("3 days free, then " + (products.first(where: { $0.id == weeklyProductID })?.displayPrice ?? "$9.99/week"))
-                                        .font(.footnote)
-                                        .foregroundColor(.gray)
-                                        .multilineTextAlignment(.center)
-                                        .lineLimit(nil)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                            }
-                            .disabled(isPurchasing || products.isEmpty)
-                            Button(action: { purchasePlan(weekly: false) }) {
-                                VStack(spacing: 2) {
-                                    Text("Subscribe for " + (products.first(where: { $0.id == yearlyProductID })?.displayPrice ?? "$39.99/year"))
-                                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 16)
-                                        .background(Color.orange)
-                                        .cornerRadius(18)
-                                        .shadow(color: Color.orange.opacity(0.13), radius: 6, y: 2)
-                                    Text("1 year, best value")
-                                        .font(.footnote)
-                                        .foregroundColor(.gray)
-                                        .multilineTextAlignment(.center)
-                                        .lineLimit(nil)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                            }
-                            .disabled(isPurchasing || products.isEmpty)
-                        }
-                        .padding(.top, 8)
-                        // What's different
-                        VStack(alignment: .leading, spacing: 12) {
-                            Divider().background(Color.black.opacity(0.08))
-                                .padding(.vertical, 8)
-                            Text("What's different about this app?")
-                                .font(.title3.bold())
-                                .foregroundColor(.black)
-                                .multilineTextAlignment(.center)
-                                .padding(.bottom, 2)
-                            HStack(alignment: .top, spacing: 10) {
-                                Image(systemName: "shield.checkerboard")
-                                    .foregroundColor(.green)
-                                Text("Your data is 100% safe and private, photos never leave your phone and they are not uploaded anywhere and only viewed by you.")
-                                    .font(.subheadline)
-                                    .foregroundColor(.black)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    .multilineTextAlignment(.leading)
-                                    .lineLimit(nil)
-                            }
-                            HStack(alignment: .top, spacing: 10) {
-                                Image(systemName: "nosign")
-                                    .foregroundColor(.red)
-                                Text("No ads ever")
-                                    .font(.subheadline)
-                                    .foregroundColor(.black)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    .multilineTextAlignment(.leading)
-                                    .lineLimit(nil)
-                            }
-                        }
-                        .padding(.top, 8)
-                        .padding(.bottom, 2)
-                        // Error
-                        if let error = purchaseError {
-                            Text(error)
-                                .foregroundColor(.red)
-                                .multilineTextAlignment(.center)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .lineLimit(nil)
-                        }
-                        // Restore/Terms
-                        HStack {
-                            Button(action: restore) {
-                                Text("Restore")
-                                    .font(.footnote)
-                                    .underline()
-                                    .foregroundColor(.gray)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            Spacer()
-                            Button(action: { /* open terms */ }) {
-                                Text("Terms Of Use")
-                                    .font(.footnote)
-                                    .underline()
-                                    .foregroundColor(.gray)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                        .padding(.top, 8)
+                    Button(action: { showFAQ = true }) {
+                        Text("FAQ")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .underline()
+                            .foregroundColor(.black.opacity(0.35))
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 28)
-                    .background(Color.white.opacity(0.98))
-                    .cornerRadius(32)
-                    .shadow(color: .black.opacity(0.10), radius: 18, x: 0, y: 8)
-                    .frame(maxWidth: 420)
-                    .frame(minHeight: 700)
-                    Spacer(minLength: 0)
+                    Spacer()
+                    Button(action: { /* open terms */ }) {
+                        Text("Terms Of Use")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .underline()
+                            .foregroundColor(.black.opacity(0.35))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
-                Spacer(minLength: 0)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 8)
             }
-            .safeAreaInset(edge: .bottom) { Spacer().frame(height: 16) }
-            .safeAreaInset(edge: .top) { Spacer().frame(height: 0) }
-            // Add keyboard dismiss gesture to the outer ZStack
-            .gesture(
-                TapGesture().onEnded { UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) }
-            )
+        }
+        .sheet(isPresented: $showFAQ) {
+            SettingsFAQView()
         }
         .task {
             await loadProducts()
@@ -307,4 +270,39 @@ struct VisualEffectBlur: UIViewRepresentable {
         return UIVisualEffectView(effect: UIBlurEffect(style: blurStyle))
     }
     func updateUIView(_ uiView: UIVisualEffectView, context: Context) {}
+}
+
+// PulsingButton reusable component
+struct PulsingButton: View {
+    let title: String
+    let subtitle: String
+    let gradient: LinearGradient
+    let action: () -> Void
+    var disabled: Bool = false
+    @State private var animate = false
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 2) {
+                Text(title)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(gradient)
+                    .cornerRadius(18)
+                    .shadow(color: Color.black.opacity(0.10), radius: 8, y: 4)
+                Text(subtitle)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.black.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .scaleEffect(animate ? 1.04 : 1.0)
+        .animation(Animation.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: animate)
+        .onAppear { animate = true }
+        .disabled(disabled)
+    }
 } 
