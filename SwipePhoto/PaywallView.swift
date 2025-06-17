@@ -38,128 +38,155 @@ struct PaywallView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Color(red: 1.0, green: 0.74, blue: 0.83) // FFBCD3
-                .ignoresSafeArea()
+            Color.black.ignoresSafeArea()
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red:0.13, green:0.09, blue:0.23),
+                    Color(red:0.18, green:0.13, blue:0.32),
+                    Color(red:0.22, green:0.09, blue:0.32),
+                    Color(red:0.13, green:0.13, blue:0.23),
+                    Color.purple.opacity(0.7),
+                    Color.blue.opacity(0.7),
+                    Color.pink.opacity(0.7),
+                    Color.black.opacity(0.65)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
             VStack(spacing: 0) {
-                // GIF at the top (smaller)
-                WebImage(url: URL(string: "https://media.giphy.com/media/XMmf6i3xuKZiPMvNZe/giphy.gif"))
-                    .resizable()
-                    .indicator(.activity)
-                    .scaledToFit()
-                    .frame(height: 110)
-                    .cornerRadius(18)
-                    .shadow(color: Color.black.opacity(0.13), radius: 8, y: 3)
-                    .padding(.top, 32)
+                Spacer(minLength: 0)
+                // Remove the card background, just show content
+                VStack(spacing: 0) {
+                    // GIF at the top (smaller)
+                    WebImage(url: URL(string: "https://media.giphy.com/media/XMmf6i3xuKZiPMvNZe/giphy.gif"))
+                        .resizable()
+                        .indicator(.activity)
+                        .scaledToFit()
+                        .frame(height: 110)
+                        .cornerRadius(18)
+                        .shadow(color: Color.black.opacity(0.13), radius: 8, y: 3)
+                        .padding(.top, 32)
+                        .padding(.bottom, 8)
+
+                    // Title
+                    Text("Unlock Premium 👑")
+                        .font(.custom("Poppins-SemiBold", size: 32))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 8)
+                        .padding(.bottom, 2)
+
+                    // Playful subtitle
+                    Text("Get unlimited swipes and deletes")
+                        .font(.custom("Poppins-Medium", size: 20))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 1)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 18)
+
+                    // Cancel anytime row
+                    HStack(alignment: .center, spacing: 12) {
+                        Image(systemName: "arrow.2.circlepath")
+                            .foregroundColor(Color.purple)
+                            .font(.system(size: 18))
+                        Text("Auto-renewable. Cancel anytime.")
+                            .font(.custom("Poppins-Regular", size: 15))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.85), radius: 2, x: 0, y: 1)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 24)
+
+                    // Subscription Options with pulsing animation
+                    VStack(spacing: 20) {
+                        PulsingButton(
+                            title: "Try For Free",
+                            subtitle: "3 days free, then $1.99/week",
+                            gradient: LinearGradient(
+                                gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            action: { purchasePlan(weekly: true) },
+                            disabled: isPurchasing || products.isEmpty
+                        )
+                        PulsingButton(
+                            title: "Subscribe for $9.99/year",
+                            subtitle: "1 year, best value",
+                            gradient: LinearGradient(
+                                gradient: Gradient(colors: [Color(red:0.2, green:0.6, blue:1.0), Color(red:1.0, green:0.0, blue:0.6)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            action: { purchasePlan(weekly: false) },
+                            disabled: isPurchasing || products.isEmpty
+                        )
+                    }
+                    .padding(.horizontal, 24)
                     .padding(.bottom, 8)
 
-                // Title
-                Text("Unlock Premium 👑")
-                    .font(.custom("Poppins-Bold", size: 38))
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 8)
-                    .padding(.bottom, 2)
+                    // Error
+                    if let error = purchaseError {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(nil)
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 8)
+                    }
 
-                // Playful subtitle
-                Text("Get unlimited swipes and deletes")
-                    .font(.custom("Poppins-SemiBold", size: 22))
-                    .foregroundColor(.black.opacity(0.85))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
+                    // What makes us different
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("What makes us different?")
+                            .font(.custom("Poppins-Medium", size: 20))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 1)
+                            .padding(.bottom, 2)
+                        HStack(alignment: .top, spacing: 10) {
+                            Text("💖")
+                                .font(.system(size: 22))
+                            Text("All photos and data stay on your device and are 100% private")
+                                .font(.custom("Poppins-Regular", size: 16))
+                                .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
+                        }
+                        HStack(alignment: .top, spacing: 10) {
+                            Text("💜")
+                                .font(.system(size: 22))
+                            Text("Significantly cheaper than most competitor apps")
+                                .font(.custom("Poppins-Regular", size: 16))
+                                .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
+                        }
+                        HStack(alignment: .top, spacing: 10) {
+                            Text("💙")
+                                .font(.system(size: 22))
+                            Text("Built for girls, by girls. Help support women in tech!")
+                                .font(.custom("Poppins-Regular", size: 16))
+                                .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
+                        }
+                    }
+                    .padding(.horizontal, 28)
+                    .padding(.top, 18)
                     .padding(.bottom, 18)
-
-                // Cancel anytime row (replaces FAQ/data row)
-                HStack(alignment: .center, spacing: 12) {
-                    Image(systemName: "arrow.2.circlepath")
-                        .foregroundColor(Color.purple)
-                        .font(.system(size: 18))
-                    Text("Auto-renewable. Cancel anytime.")
-                        .font(.custom("Poppins-Regular", size: 15))
-                        .foregroundColor(.black.opacity(0.7))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
                 }
-                .padding(.horizontal, 18)
-                .padding(.bottom, 24)
-
-                // Subscription Options with pulsing animation
-                VStack(spacing: 20) {
-                    PulsingButton(
-                        title: "Try For Free",
-                        subtitle: "3 days free, then " + (products.first(where: { $0.id == weeklyProductID })?.displayPrice ?? "$9.99/week"),
-                        gradient: LinearGradient(
-                            gradient: Gradient(colors: [Color(red: 0.95, green: 0.2, blue: 0.7), Color(red: 1.0, green: 0.5, blue: 0.4)]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        action: { purchasePlan(weekly: true) },
-                        disabled: isPurchasing || products.isEmpty
-                    )
-                    PulsingButton(
-                        title: "Subscribe for " + (products.first(where: { $0.id == yearlyProductID })?.displayPrice ?? "$39.99/year"),
-                        subtitle: "1 year, best value",
-                        gradient: LinearGradient(
-                            gradient: Gradient(colors: [Color(red: 0.6, green: 0.3, blue: 0.9), Color(red: 0.4, green: 0.5, blue: 0.9)]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        action: { purchasePlan(weekly: false) },
-                        disabled: isPurchasing || products.isEmpty
-                    )
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 8)
-
-                // Error
-                if let error = purchaseError {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .lineLimit(nil)
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 8)
-                }
-
-                // Move up the 'What makes us different?' section
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("What makes us different?")
-                        .font(.custom("Poppins-Medium", size: 20))
-                        .foregroundColor(.black)
-                        .padding(.bottom, 2)
-                    HStack(alignment: .top, spacing: 10) {
-                        Text("💖")
-                            .font(.system(size: 22))
-                        Text("All photos and data stay on your device and are 100% private")
-                            .font(.custom("Poppins-Regular", size: 16))
-                            .foregroundColor(.black.opacity(0.8))
-                    }
-                    HStack(alignment: .top, spacing: 10) {
-                        Text("💜")
-                            .font(.system(size: 22))
-                        Text("Significantly cheaper than most competitor apps")
-                            .font(.custom("Poppins-Regular", size: 16))
-                            .foregroundColor(.black.opacity(0.8))
-                    }
-                    HStack(alignment: .top, spacing: 10) {
-                        Text("💙")
-                            .font(.system(size: 22))
-                        Text("Built for girls, by girls. Help support women in tech!")
-                            .font(.custom("Poppins-Regular", size: 16))
-                            .foregroundColor(.black.opacity(0.8))
-                    }
-                }
-                .padding(.horizontal, 28)
-                .padding(.top, 18)
-                .padding(.bottom, 18)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 32)
             }
             // X button in the top corner, overlayed
             Button(action: { dismiss() }) {
                 Image(systemName: "xmark")
                     .font(.title2.bold())
-                    .foregroundColor(.black.opacity(0.7))
+                    .foregroundColor(.white)
                     .padding(8)
-                    .background(Color.white.opacity(0.85))
+                    .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
                     .clipShape(Circle())
                     .shadow(radius: 2, y: 1)
             }
@@ -174,7 +201,8 @@ struct PaywallView: View {
                         Text("Restore")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                             .underline()
-                            .foregroundColor(.black.opacity(0.35))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.85), radius: 2, x: 0, y: 1)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer()
@@ -182,7 +210,8 @@ struct PaywallView: View {
                         Text("FAQ")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                             .underline()
-                            .foregroundColor(.black.opacity(0.35))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.85), radius: 2, x: 0, y: 1)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer()
@@ -190,7 +219,8 @@ struct PaywallView: View {
                         Text("Terms Of Use")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                             .underline()
-                            .foregroundColor(.black.opacity(0.35))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.85), radius: 2, x: 0, y: 1)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -285,16 +315,19 @@ struct PulsingButton: View {
         Button(action: action) {
             VStack(spacing: 2) {
                 Text(title)
-                    .font(.custom("Poppins-SemiBold", size: 20))
+                    .font(.custom("Poppins-ExtraBold", size: 24))
                     .foregroundColor(.white)
+                    .shadow(color: .black.opacity(1.0), radius: 6, x: 0, y: 2)
+                    .shadow(color: .white.opacity(0.18), radius: 8, x: 0, y: 0)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 18)
                     .background(gradient)
                     .cornerRadius(18)
-                    .shadow(color: Color.black.opacity(0.10), radius: 8, y: 4)
+                    .shadow(color: Color.black.opacity(0.13), radius: 10, y: 5)
                 Text(subtitle)
                     .font(.custom("Poppins-Regular", size: 14))
-                    .foregroundColor(.black.opacity(0.7))
+                    .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.85), radius: 2, x: 0, y: 1)
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)

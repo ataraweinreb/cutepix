@@ -9,7 +9,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            // Darker, vibrant, multi-color animated gradient background
+            Color.black.ignoresSafeArea()
             LinearGradient(
                 gradient: Gradient(colors: [Color(red:0.13, green:0.09, blue:0.23), Color(red:0.18, green:0.13, blue:0.32), Color(red:0.22, green:0.09, blue:0.32), Color(red:0.13, green:0.13, blue:0.23), Color.purple.opacity(0.7), Color.blue.opacity(0.7), Color.pink.opacity(0.7)]),
                 startPoint: .topLeading,
@@ -58,7 +58,7 @@ struct OnboardingView: View {
                             .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
                             .multilineTextAlignment(.center)
                         // Get Started button inside the card with pulse animation
-                        PulsingGradientButton(
+                        GradientWideButton(
                             title: "Get Started",
                             gradient: LinearGradient(
                                 gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
@@ -72,7 +72,6 @@ struct OnboardingView: View {
                                 onFinish()
                             }
                         }
-                        .buttonStyle(PlainButtonStyle())
                         .frame(height: 88)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 28)
@@ -282,8 +281,8 @@ struct ShimmerView: View {
     }
 }
 
-//// PulsingButton reusable component
-//struct PulsingGradientButton<Label: View>: View {
+//// GradientWideButton reusable component
+//struct GradientWideButton<Label: View>: View {
 //    let action: () -> Void
 //    let label: () -> Label
 //    @State private var animate = false

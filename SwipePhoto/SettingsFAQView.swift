@@ -39,16 +39,30 @@ struct SettingsFAQView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Color(red: 1.0, green: 0.74, blue: 0.83)
-                    .ignoresSafeArea(edges: .all)
-                VStack(spacing: 24) {
+                Color.black.ignoresSafeArea()
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red:0.13, green:0.09, blue:0.23),
+                        Color(red:0.18, green:0.13, blue:0.32),
+                        Color(red:0.22, green:0.09, blue:0.32),
+                        Color(red:0.13, green:0.13, blue:0.23),
+                        Color.purple.opacity(0.7),
+                        Color.blue.opacity(0.7),
+                        Color.pink.opacity(0.7),
+                        Color.black.opacity(0.65)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea(edges: .all)
+                VStack(spacing: 32) {
                     HStack {
                         Button(action: { presentationMode.wrappedValue.dismiss() }) {
                             Image(systemName: "arrow.left")
                                 .font(.custom("Poppins-Bold", size: 22))
-                                .foregroundColor(.black.opacity(0.7))
+                                .foregroundColor(.white)
                                 .padding(8)
-                                .background(Color.white.opacity(0.85))
+                                .background(Color.black.opacity(0.32))
                                 .clipShape(Circle())
                                 .shadow(radius: 2, y: 1)
                         }
@@ -58,7 +72,8 @@ struct SettingsFAQView: View {
                     .padding(.leading, 18)
                     Text("Swipe for FAQ")
                         .font(.custom("Poppins-Bold", size: 32))
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
                         .multilineTextAlignment(.center)
                         .padding(.top, 8)
                     Spacer(minLength: 0)
@@ -194,7 +209,7 @@ struct FAQPolaroidCard: View {
                     .indicator(.activity)
                     .scaledToFit()
                     .frame(width: cardWidth * 0.86, height: cardHeight * 0.5)
-                    .background(Color.white)
+                    .background(Color.white.opacity(0.12))
                     .padding(.top, 20)
                     .padding(.horizontal, 20)
             } else {
@@ -217,9 +232,12 @@ struct FAQPolaroidCard: View {
             Spacer(minLength: 18)
         }
         .frame(width: cardWidth, height: cardHeight)
-        .background(Color.white)
+        .background(
+            RoundedRectangle(cornerRadius: cardWidth * 0.032, style: .continuous)
+                .fill(Color.white)
+        )
         .cornerRadius(cardWidth * 0.032)
-        .shadow(color: Color.black.opacity(0.2), radius: 12, x: 0, y: 7)
+        .shadow(color: Color.black.opacity(0.22), radius: 16, x: 0, y: 7)
         .rotationEffect(.degrees(rotation))
     }
 } 

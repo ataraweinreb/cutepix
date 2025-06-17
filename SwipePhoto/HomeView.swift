@@ -47,6 +47,7 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             ZStack {
+                Color.black.ignoresSafeArea()
                 LinearGradient(
                     gradient: Gradient(colors: [Color(red:0.13, green:0.09, blue:0.23), Color(red:0.18, green:0.13, blue:0.32), Color(red:0.22, green:0.09, blue:0.32), Color(red:0.13, green:0.13, blue:0.23), Color.purple.opacity(0.7), Color.blue.opacity(0.7), Color.pink.opacity(0.7)]),
                     startPoint: .topLeading,
@@ -67,7 +68,7 @@ struct HomeView: View {
                                 .padding(.horizontal, 24)
                                 .padding(.top, 8)
                                 .fixedSize(horizontal: false, vertical: true)
-                            PulsingGradientButton(title: "Open Settings", gradient: LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing)) {
+                            GradientWideButton(title: "Open Settings", gradient: LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing)) {
                                 if let url = URL(string: UIApplication.openSettingsURLString) {
                                     UIApplication.shared.open(url)
                                 }
