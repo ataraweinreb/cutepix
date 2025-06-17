@@ -1,6 +1,7 @@
 import SwiftUI
 import Photos
 import PhotosUI
+import SDWebImageSwiftUI
 
 import SwiftUI
 
@@ -40,8 +41,43 @@ struct HomeView: View {
                     headerView
                         .offset(y: headerHidden ? -120 : 0)
                         .animation(.easeInOut(duration: 0.25), value: headerHidden)
-                    Button("Show Paywall (Test)") { showPaywall = true }
-                        .padding(.bottom, 8)
+                    if photoManager.authorizationStatus == .denied || photoManager.authorizationStatus == .restricted {
+                        Spacer()
+                        VStack(spacing: 24) {
+                            Text("Hey bestie! 🦄✨\nColor Clean needs access to your photos to help you clean your camera roll. 📸🧼")
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 24)
+                                .padding(.top, 8)
+                                .fixedSize(horizontal: false, vertical: true)
+                            PulsingGradientButton(title: "Open Settings") {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            SwipeablePolaroidStack(
+                                gifUrls: [
+                                    "https://media.giphy.com/media/3o7aTvhUAeRLAVx8vm/giphy.gif",
+                                    "https://media.giphy.com/media/TydZAW0DVCbGE/giphy.gif",
+                                    "https://media.giphy.com/media/ydttw7Bg2tHVHecInE/giphy.gif"
+                                ],
+                                captions: [
+                                    "No photos? 😭 My heart is breaking!",
+                                    "Please let me help clean your camera roll! 🥺",
+                                    "I promise I'll be gentle with your memories! 💕"
+                                ]
+                            )
+                            Text("swipe me! ⬆️")
+                                .font(.custom("Bradley Hand", size: 22))
+                                .foregroundColor(.purple)
+                                .padding(.top, 4)
+                        }
+                        .frame(maxWidth: .infinity)
+                        Spacer()
+                    } else {
+                        Button("Show Paywall (Test)") { showPaywall = true }
+                            .padding(.bottom, 8)
                     ScrollView {
                         ScrollOffsetReader()
                             .frame(height: 0)
@@ -49,21 +85,21 @@ struct HomeView: View {
                             GridItem(.adaptive(minimum: UIScreen.main.bounds.width > 600 ? 220 : 160, maximum: UIScreen.main.bounds.width > 600 ? 260 : 200), spacing: 16)
                         ]
                         LazyVGrid(columns: columns, spacing: 16) {
-                            if photoManager.isLoading && photoManager.photoMonths.isEmpty {
-                                ForEach(0..<10, id: \ .self) { index in
-                                    ShimmerAlbumCard(gradient: rainbowGradients[index % rainbowGradients.count])
-                                }
-                            } else {
-                                ForEach(Array(menuItems.enumerated()), id: \ .element.id) { index, item in
-                                    MenuCardView(item: item, recentsCount: item.month?.assets.count ?? 0, gradient: rainbowGradients[index % rainbowGradients.count]) {
-                                        if let month = item.month, !month.assets.isEmpty {
-                                            if isPremium || (totalSwipes < 3 && !hasSeenPaywall) {
-                                                selectedMonth = month
-                                            } else {
-                                                showPaywall = true
+                                if photoManager.isLoading && photoManager.photoMonths.isEmpty {
+                                    ForEach(0..<10, id: \ .self) { index in
+                                        ShimmerAlbumCard(gradient: rainbowGradients[index % rainbowGradients.count])
+                                    }
+                                } else {
+                                    ForEach(Array(menuItems.enumerated()), id: \ .element.id) { index, item in
+                                        MenuCardView(item: item, recentsCount: item.month?.assets.count ?? 0, gradient: rainbowGradients[index % rainbowGradients.count]) {
+                                    if let month = item.month, !month.assets.isEmpty {
+                                                if isPremium || (totalSwipes < 3 && !hasSeenPaywall) {
+                                        selectedMonth = month
+                                                } else {
+                                                    showPaywall = true
+                                                }
                                             }
                                         }
-                                    }
                                 }
                             }
                         }
@@ -83,8 +119,9 @@ struct HomeView: View {
                     }
                     .sheet(item: $selectedMonth) { month in
                         PhotoSwipeView(month: month, onBatchDelete: {
-                            // Removed redundant photoManager.fetchPhotos() call
-                        }, photoManager: photoManager)
+                                // Removed redundant photoManager.fetchPhotos() call
+                            }, photoManager: photoManager)
+                        }
                     }
                 }
             }
@@ -109,19 +146,19 @@ struct HomeView: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
                 ZStack {
-                    Text("Color Clean")
+                Text("Color Clean")
                         .font(.system(size: 48, weight: .bold, design: .rounded))
                         .foregroundColor(.clear)
-                        .overlay(
-                            LinearGradient(
-                                colors: [
+                    .overlay(
+                        LinearGradient(
+                            colors: [
                                     .red, .orange, .yellow, .green, .blue, .purple
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                            .mask(
-                                Text("Color Clean")
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        .mask(
+                            Text("Color Clean")
                                     .font(.system(size: 48, weight: .bold, design: .rounded))
                             )
                         )
@@ -646,5 +683,192 @@ struct ShimmerModifier: ViewModifier {
                         .onAppear { phase = 1 }
                 }
             )
+    }
+}
+
+struct SwipeablePolaroidStack: View {
+    let gifUrls: [String]
+    let captions: [String]
+    @State private var currentIndex = 0
+    @State private var offset: CGSize = .zero
+    @GestureState private var dragState = CGSize.zero
+    
+    var body: some View {
+        ZStack {
+            ForEach((currentIndex..<min(currentIndex+3, gifUrls.count + 2)).reversed(), id: \.self) { idx in
+                let stackOffset = idx - currentIndex
+                PolaroidGifCard(
+                    gifUrl: gifUrls[idx % gifUrls.count],
+                    caption: captions[idx % captions.count],
+                    baseRotation: Double(stackOffset) * 3.0
+                )
+                    .offset(
+                        x: idx == currentIndex ? offset.width : CGFloat(stackOffset) * 8,
+                        y: CGFloat(stackOffset) * 12
+                    )
+                    .rotationEffect(.degrees(idx == currentIndex ? Double(offset.width / 12) : Double(stackOffset) * 3.0))
+                    .scaleEffect(idx == currentIndex ? 1.0 : 1.0 - CGFloat(stackOffset) * 0.05)
+                    .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.5), value: offset)
+                    .allowsHitTesting(idx == currentIndex)
+                    .gesture(
+                        idx == currentIndex ?
+                        DragGesture()
+                            .updating($dragState) { value, state, _ in
+                                state = value.translation
+                            }
+                            .onChanged { gesture in
+                                offset = gesture.translation
+                            }
+                            .onEnded { gesture in
+                                let velocity = gesture.predictedEndTranslation.width - gesture.translation.width
+                                let threshold: CGFloat = 100
+                                if offset.width > threshold || velocity > 200 {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        offset.width = UIScreen.main.bounds.width
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        currentIndex = (currentIndex + 1) % gifUrls.count
+                                        offset = .zero
+                                    }
+                                } else if offset.width < -threshold || velocity < -200 {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        offset.width = -UIScreen.main.bounds.width
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        currentIndex = (currentIndex + 1) % gifUrls.count
+                                        offset = .zero
+                                    }
+                                } else {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        offset = .zero
+                                    }
+                                }
+                            }
+                        : nil
+                    )
+            }
+        }
+        .frame(height: 400)
+        .padding(.horizontal, 16)
+    }
+}
+
+struct PolaroidGifCard: View {
+    let gifUrl: String
+    let caption: String
+    let baseRotation: Double
+    @State private var rotation: Double
+    
+    init(gifUrl: String, caption: String, baseRotation: Double = 0) {
+        self.gifUrl = gifUrl
+        self.caption = caption
+        self.baseRotation = baseRotation
+        _rotation = State(initialValue: baseRotation + Double.random(in: -2...2))
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            WebImage(url: URL(string: gifUrl))
+                .resizable()
+                .indicator(.activity)
+                .scaledToFit()
+                .frame(width: 280, height: 280)
+                .background(Color.white)
+                .padding(.top, 20)
+                .padding(.horizontal, 20)
+            
+            Text(caption)
+                .font(.custom("Bradley Hand", size: 22))
+                .foregroundColor(.black)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 18)
+                .frame(maxWidth: .infinity, minHeight: 48)
+                .background(Color.white)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(width: 320, height: 390)
+        .background(Color.white)
+        .cornerRadius(8)
+        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+        .rotationEffect(.degrees(rotation))
+    }
+}
+
+struct PulsingGradientButton: View {
+    let title: String
+    let action: () -> Void
+    @State private var animate = false
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .padding(.vertical, 20)
+                .padding(.horizontal, 48)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color(red: 1.0, green: 0.18, blue: 0.33), // Hot Pink #FF2D55
+                            Color(red: 0.64, green: 0.35, blue: 0.97)  // Vibrant Purple #A259F7
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .cornerRadius(24)
+                .scaleEffect(animate ? 1.08 : 1.0)
+                .shadow(color: Color.pink.opacity(0.25), radius: 12, x: 0, y: 6)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .onAppear {
+            withAnimation(Animation.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
+                animate = true
+            }
+        }
+    }
+}
+
+struct SwirlyArrowSwipeHint: View {
+    @State private var animate = false
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack {
+                SwirlyArrowShape()
+                    .stroke(Color.purple, style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
+                    .frame(width: 70, height: 40)
+                    .rotationEffect(.degrees(animate ? 8 : -8), anchor: .bottomLeading)
+                    .offset(x: 0, y: 0)
+                    .animation(Animation.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: animate)
+                Text("swipe me! ⤵️")
+                    .font(.custom("Bradley Hand", size: 20))
+                    .foregroundColor(.purple)
+                    .offset(x: 50, y: 18)
+                    .rotationEffect(.degrees(10))
+            }
+            .frame(height: 44)
+        }
+        .onAppear {
+            animate = true
+        }
+    }
+}
+
+struct SwirlyArrowShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        // Swirly curve
+        path.move(to: CGPoint(x: rect.minX + 10, y: rect.maxY - 10))
+        path.addCurve(to: CGPoint(x: rect.maxX - 30, y: rect.minY + 18),
+                      control1: CGPoint(x: rect.minX + 40, y: rect.maxY - 30),
+                      control2: CGPoint(x: rect.maxX - 50, y: rect.minY + 40))
+        // Arrowhead
+        let tip = CGPoint(x: rect.maxX - 10, y: rect.minY + 10)
+        path.addLine(to: tip)
+        path.move(to: tip)
+        path.addLine(to: CGPoint(x: tip.x - 16, y: tip.y + 10))
+        path.move(to: tip)
+        path.addLine(to: CGPoint(x: tip.x - 10, y: tip.y + 18))
+        return path
     }
 } 
