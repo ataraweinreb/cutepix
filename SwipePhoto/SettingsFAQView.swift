@@ -89,25 +89,6 @@ struct SettingsFAQView: View {
                                 .shadow(radius: 4, y: 2)
                         }
                     }
-                    VStack(spacing: 16) {
-                        PulsingGradientButton(
-                            title: "Leave us a review",
-                            gradient: LinearGradient(gradient: Gradient(colors: [Color.pink, Color.purple]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                        ) {
-                            if let url = URL(string: "https://apps.apple.com/app/idYOUR_APP_ID?action=write-review") {
-                                UIApplication.shared.open(url)
-                            }
-                        }
-                        PulsingGradientButton(
-                            title: "Manage Subscription",
-                            gradient: LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                        ) {
-                            if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                                UIApplication.shared.open(url)
-                            }
-                        }
-                    }
-                    .padding(.bottom, max(geo.safeAreaInsets.bottom, 12))
                 }
                 .frame(maxWidth: 600)
                 .padding(.horizontal, 0)
