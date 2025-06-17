@@ -18,18 +18,30 @@ struct HomeView: View {
     @AppStorage("hasSeenPaywall") private var hasSeenPaywall: Bool = false
     
     let rainbowGradients: [LinearGradient] = [
-        // Bright, contrasty pink
-        LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.2, blue: 0.7), Color(red: 1.0, green: 0.55, blue: 0.85)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // Bright orange
-        LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.6, blue: 0.0), Color.orange]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // Bright yellow
-        LinearGradient(gradient: Gradient(colors: [Color.yellow, Color(red: 1.0, green: 0.9, blue: 0.2)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // Bright green
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 1.0, blue: 0.5), Color.green]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // Bright blue
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 0.6, blue: 1.0), Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // Bright purple
-        LinearGradient(gradient: Gradient(colors: [Color.purple, Color(red: 0.6, green: 0.2, blue: 1.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        // 1. Hot pink → peach
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.95, green: 0.2, blue: 0.7), Color(red: 1.0, green: 0.5, blue: 0.4)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 2. Rich purple → blue
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.6, green: 0.3, blue: 0.9), Color(red: 0.4, green: 0.5, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 3. Vibrant aqua → sky blue
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.3, green: 0.9, blue: 0.9), Color(red: 0.4, green: 0.6, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 4. Deep pink → lavender
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.9, green: 0.3, blue: 0.8), Color(red: 0.7, green: 0.5, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 5. Coral → golden
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.95, green: 0.5, blue: 0.4), Color(red: 0.95, green: 0.8, blue: 0.4)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 6. Emerald → teal
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.4, green: 0.9, blue: 0.7), Color(red: 0.2, green: 0.7, blue: 0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 7. Sunset orange → pink
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.95, green: 0.5, blue: 0.4), Color(red: 0.9, green: 0.3, blue: 0.8)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 8. Royal blue → purple
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.3, green: 0.5, blue: 0.9), Color(red: 0.6, green: 0.3, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 9. Deep fuchsia → magenta
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.9, green: 0.2, blue: 0.5), Color(red: 0.8, green: 0.2, blue: 0.5)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 10. Golden → mint
+        LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.9, blue: 0.4), Color(red: 0.4, green: 0.9, blue: 0.7)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 11. Deep coral → pink
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.95, green: 0.5, blue: 0.4), Color(red: 0.95, green: 0.2, blue: 0.7)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        // 12. Deep blue → aqua
+        LinearGradient(gradient: Gradient(colors: [Color(red: 0.3, green: 0.5, blue: 0.9), Color(red: 0.3, green: 0.9, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing)
     ]
     
     var body: some View {
@@ -51,7 +63,7 @@ struct HomeView: View {
                                 .padding(.horizontal, 24)
                                 .padding(.top, 8)
                                 .fixedSize(horizontal: false, vertical: true)
-                            PulsingGradientButton(title: "Open Settings") {
+                            PulsingGradientButton(title: "Open Settings", gradient: LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing)) {
                                 if let url = URL(string: UIApplication.openSettingsURLString) {
                                     UIApplication.shared.open(url)
                                 }
@@ -145,36 +157,9 @@ struct HomeView: View {
     var headerView: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
-                ZStack {
                 Text("Color Clean")
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(.clear)
-                    .overlay(
-                        LinearGradient(
-                            colors: [
-                                    .red, .orange, .yellow, .green, .blue, .purple
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                        .mask(
-                            Text("Color Clean")
-                                    .font(.system(size: 48, weight: .bold, design: .rounded))
-                            )
-                        )
-                        .overlay(
-                            Text("Color Clean")
-                                .font(.system(size: 48, weight: .bold, design: .rounded))
-                                .foregroundColor(.black)
-                                .opacity(1)
-                                .offset(x: 0, y: 0)
-                                .overlay(
-                                    Text("Color Clean")
-                                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                                       // .stroke(Color.black, lineWidth: 4)
-                                )
-                        )
-                }
+                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                    .foregroundColor(.black)
                 Text("choose a month to sort and delete photos.")
                     .font(.subheadline)
                     .foregroundColor(.black)
@@ -193,7 +178,7 @@ struct HomeView: View {
                     .padding(8)
             }
             .sheet(isPresented: $showSettings) {
-                SettingsView()
+                SettingsMainView()
             }
         }
         .padding(.top, 32)
@@ -401,57 +386,6 @@ struct MenuItem: Identifiable {
     var imageBackground: String? = nil
 }
 
-struct SettingsView: View {
-    var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            Text("Settings").font(.largeTitle)
-            VStack(alignment: .leading, spacing: 16) {
-                Text("FAQ")
-                    .font(.title2.bold())
-                    .padding(.bottom, 4)
-                Group {
-                    Text("**What is this app?**")
-                        .font(.headline)
-                    Text("SwipePhoto helps you quickly clean up your photo library by swiping through your photos, Tinder-style. Organize by month, swipe right to keep, left to delete, and enjoy a fast, colorful, and private experience.")
-                        .font(.subheadline)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .foregroundColor(.secondary)
-                    Text("**Are my photos private?**")
-                        .font(.headline)
-                    Text("Yes! Your photos never leave your device. All processing and sorting happens locally on your phone. We do not collect or upload any of your photos.")
-                        .font(.subheadline)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .foregroundColor(.secondary)
-                    Text("**How do I unsubscribe or manage my subscription?**")
-                        .font(.headline)
-                    Text("Tap the 'Manage Subscription' button below to open the App Store and manage or cancel your subscription at any time.")
-                        .font(.subheadline)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(16)
-            Button(action: {
-                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                    UIApplication.shared.open(url)
-                }
-            }) {
-                Text("Manage Subscription")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.orange)
-                    .cornerRadius(12)
-            }
-            Spacer()
-        }
-        .padding(.horizontal)
-    }
-}
-
 struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
@@ -493,11 +427,13 @@ struct MenuCardView: View {
                         .textCase(item.style.textCase)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
+                        .shadow(color: .white.opacity(0.4), radius: 0.5, x: 0, y: 0.5)
                     Text("\(recentsCount) photos")
                         .font(.system(size: 18, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
+                        .shadow(color: .black.opacity(0.15), radius: 0.5, x: 0, y: 0.5)
                 }
                 .padding(size * 0.11)
                 .frame(width: geo.size.width, height: geo.size.height)
@@ -792,40 +728,6 @@ struct PolaroidGifCard: View {
         .cornerRadius(8)
         .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
         .rotationEffect(.degrees(rotation))
-    }
-}
-
-struct PulsingGradientButton: View {
-    let title: String
-    let action: () -> Void
-    @State private var animate = false
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .padding(.vertical, 20)
-                .padding(.horizontal, 48)
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 1.0, green: 0.18, blue: 0.33), // Hot Pink #FF2D55
-                            Color(red: 0.64, green: 0.35, blue: 0.97)  // Vibrant Purple #A259F7
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .cornerRadius(24)
-                .scaleEffect(animate ? 1.08 : 1.0)
-                .shadow(color: Color.pink.opacity(0.25), radius: 12, x: 0, y: 6)
-        }
-        .buttonStyle(PlainButtonStyle())
-        .onAppear {
-            withAnimation(Animation.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
-                animate = true
-            }
-        }
     }
 }
 
