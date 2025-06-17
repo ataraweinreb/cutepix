@@ -38,12 +38,12 @@ struct PhotoSwipeView: View {
                             .foregroundColor(.white)
                     }
                     Text(month.title)
-                        .font(.title)
+                        .font(.custom("Poppins-Bold", size: 28))
                         .foregroundColor(.white)
                     Spacer()
                     Text("\(min(currentIndex+1, month.assets.count))/\(month.assets.count)")
                         .foregroundColor(.white)
-                        .font(.headline)
+                        .font(.custom("Poppins-Regular", size: 18))
                 }
                 .padding()
                 
@@ -57,7 +57,7 @@ struct PhotoSwipeView: View {
                             .scaleEffect(2)
                         Text("Deleting photos...")
                             .foregroundColor(.white)
-                            .font(.title2)
+                            .font(.custom("Poppins-Regular", size: 22))
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .contentShape(Rectangle())
@@ -138,10 +138,10 @@ struct PhotoSwipeView: View {
                         }) {
                             VStack(spacing: 6) {
                                 Text("DELETE")
-                                    .font(.system(size: 22, weight: .bold))
+                                    .font(.custom("Poppins-Bold", size: 22))
                                     .foregroundColor(.white)
                                 Text("\(deleteCount)")
-                                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                                    .font(.custom("Poppins-Bold", size: 32))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 24)
                                     .padding(.vertical, 8)
@@ -169,10 +169,10 @@ struct PhotoSwipeView: View {
                         }) {
                             VStack(spacing: 6) {
                                 Text("KEEP")
-                                    .font(.system(size: 22, weight: .bold))
+                                    .font(.custom("Poppins-Bold", size: 22))
                                     .foregroundColor(.white)
                                 Text("\(keepCount)")
-                                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                                    .font(.custom("Poppins-Bold", size: 32))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 24)
                                     .padding(.vertical, 8)
@@ -207,7 +207,7 @@ struct PhotoSwipeView: View {
                                 .transition(.opacity)
                         }
                         Text("All done!\nYou finished this stack!")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .font(.custom("Poppins-Bold", size: 36))
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
                             .lineLimit(nil)
@@ -382,10 +382,10 @@ struct CounterCircle: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(label)
-                .font(.system(size: 20, weight: .bold))
+                .font(.custom("Poppins-Bold", size: 20))
                 .foregroundColor(.white)
             Text("\(count)")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .font(.custom("Poppins-Bold", size: 32))
                 .foregroundColor(.white)
         }
         .frame(width: 90, height: 90)

@@ -11,7 +11,7 @@ struct SettingsMainView: View {
                 HStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
                         Image(systemName: "xmark")
-                            .font(.title2.bold())
+                            .font(.custom("Poppins-Bold", size: 22))
                             .foregroundColor(.black.opacity(0.7))
                             .padding(8)
                             .background(Color.white.opacity(0.85))
@@ -24,7 +24,7 @@ struct SettingsMainView: View {
                 .padding(.leading, 18)
                 Spacer(minLength: 0)
                 Text("Settings ")
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .font(.custom("Poppins-Bold", size: 36))
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                     .padding(.bottom, 12)
@@ -81,7 +81,7 @@ struct PulsingGradientButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(.custom("Poppins-Bold", size: 24))
                 .foregroundColor(.white)
                 .shadow(color: Color.black.opacity(0.22), radius: 2, x: 0, y: 2)
                 .padding(.vertical, 20)

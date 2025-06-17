@@ -1,4 +1,5 @@
 import SwiftUI
+import SDWebImageSwiftUI
 import AVKit
 
 struct OnboardingView: View {
@@ -8,56 +9,53 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [Color.orange, Color.pink]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-
+            Color(red: 1.0, green: 0.74, blue: 0.83) // FFBCD3
+                .ignoresSafeArea()
             VStack(spacing: 32) {
                 Spacer()
-                Text("Welcome to ColorClean!")
-                    .font(.system(size: 40, weight: .bold, design: .serif))
-                    .foregroundColor(.white)
+                Text("Welcome to Color Clean! ✨")
+                    .font(.custom("Poppins-Bold", size: 40))
+                    .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
-
-                VideoPlayerView(player: playerHolder.player)
-                    .frame(height: 340)
-                    .cornerRadius(20)
+                Text("The playful, girly way to clean your camera roll 💖")
+                    .font(.custom("Poppins-SemiBold", size: 22))
+                    .foregroundColor(.black.opacity(0.85))
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
-                    .onAppear {
-                        playerHolder.playAndLoop()
-                    }
-
+                // Only show the polaroid stack, no main GIF
+                SwipeablePolaroidStack(
+                    gifUrls: [
+                        "https://media.giphy.com/media/3o7aTvhUAeRLAVx8vm/giphy.gif",
+                        "https://media.giphy.com/media/TydZAW0DVCbGE/giphy.gif",
+                        "https://media.giphy.com/media/ydttw7Bg2tHVHecInE/giphy.gif"
+                    ],
+                    captions: [
+                        "Swipe to clean! ✨",
+                        "Keep your faves 💖",
+                        "Delete the rest 🧼"
+                    ],
+                    cardSize: CGSize(width: 200, height: 240)
+                )
+                .frame(height: 260)
                 Text("Swipe through your photos, keep the best, and delete the rest. Let's get started!")
-                    .font(.title2)
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(.custom("Poppins-Medium", size: 20))
+                    .foregroundColor(.black.opacity(0.85))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
-
                 Spacer()
-
-                Button(action: {
+                PulsingGradientButton(
+                    title: "Get Started",
+                    gradient: LinearGradient(gradient: Gradient(colors: [Color.pink, Color.purple]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                ) {
                     // Stop video playback before dismissing
                     playerHolder.player.pause()
                     playerHolder.player.seek(to: .zero)
-                    // Use async to ensure video cleanup happens before dismissal
                     DispatchQueue.main.async {
                         onFinish()
                     }
-                }) {
-                    Text("Get Started")
-                        .font(.title2.bold())
-                        .foregroundColor(.orange)
-                        .padding(.vertical, 16)
-                        .padding(.horizontal, 48)
-                        .background(Color.white)
-                        .cornerRadius(16)
-                        .shadow(radius: 8)
                 }
-                Spacer()
+                .padding(.bottom, 32)
             }
         }
     }

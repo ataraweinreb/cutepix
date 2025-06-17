@@ -54,7 +54,7 @@ struct PaywallView: View {
 
                 // Title
                 Text("Unlock Premium 👑")
-                    .font(.system(size: 38, weight: .bold, design: .rounded))
+                    .font(.custom("Poppins-Bold", size: 38))
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                     .padding(.top, 8)
@@ -62,7 +62,7 @@ struct PaywallView: View {
 
                 // Playful subtitle
                 Text("Get unlimited swipes and deletes")
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .font(.custom("Poppins-SemiBold", size: 22))
                     .foregroundColor(.black.opacity(0.85))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
@@ -74,7 +74,7 @@ struct PaywallView: View {
                         .foregroundColor(Color.purple)
                         .font(.system(size: 18))
                     Text("Auto-renewable. Cancel anytime.")
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .font(.custom("Poppins-Regular", size: 15))
                         .foregroundColor(.black.opacity(0.7))
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -124,28 +124,28 @@ struct PaywallView: View {
                 // Move up the 'What makes us different?' section
                 VStack(alignment: .leading, spacing: 14) {
                     Text("What makes us different?")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.custom("Poppins-Medium", size: 20))
                         .foregroundColor(.black)
                         .padding(.bottom, 2)
                     HStack(alignment: .top, spacing: 10) {
                         Text("💖")
                             .font(.system(size: 22))
                         Text("All photos and data stay on your device and are 100% private")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .font(.custom("Poppins-Regular", size: 16))
                             .foregroundColor(.black.opacity(0.8))
                     }
                     HStack(alignment: .top, spacing: 10) {
                         Text("💜")
                             .font(.system(size: 22))
                         Text("Significantly cheaper than most competitor apps")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .font(.custom("Poppins-Regular", size: 16))
                             .foregroundColor(.black.opacity(0.8))
                     }
                     HStack(alignment: .top, spacing: 10) {
                         Text("💙")
                             .font(.system(size: 22))
                         Text("Built for girls, by girls. Help support women in tech!")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .font(.custom("Poppins-Regular", size: 16))
                             .foregroundColor(.black.opacity(0.8))
                     }
                 }
@@ -285,7 +285,7 @@ struct PulsingButton: View {
         Button(action: action) {
             VStack(spacing: 2) {
                 Text(title)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .font(.custom("Poppins-SemiBold", size: 20))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
@@ -293,7 +293,7 @@ struct PulsingButton: View {
                     .cornerRadius(18)
                     .shadow(color: Color.black.opacity(0.10), radius: 8, y: 4)
                 Text(subtitle)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .font(.custom("Poppins-Regular", size: 14))
                     .foregroundColor(.black.opacity(0.7))
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)

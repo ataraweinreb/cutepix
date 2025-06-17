@@ -57,7 +57,7 @@ struct HomeView: View {
                         Spacer()
                         VStack(spacing: 24) {
                             Text("Hey bestie! 🦄✨\nColor Clean needs access to your photos to help you clean your camera roll. 📸🧼")
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .font(.custom("Poppins-Bold", size: 20))
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
@@ -81,15 +81,15 @@ struct HomeView: View {
                                 ]
                             )
                             Text("swipe me! ⬆️")
-                                .font(.custom("Bradley Hand", size: 22))
+                                .font(.custom("Poppins-Regular", size: 22))
                                 .foregroundColor(.purple)
                                 .padding(.top, 4)
                         }
                         .frame(maxWidth: .infinity)
                         Spacer()
                     } else {
-                        Button("Show Paywall (Test)") { showPaywall = true }
-                            .padding(.bottom, 8)
+//                        Button("Show Paywall (Test)") { showPaywall = true }
+//                            .padding(.bottom, 8)
                     ScrollView {
                         ScrollOffsetReader()
                             .frame(height: 0)
@@ -158,11 +158,11 @@ struct HomeView: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Color Clean")
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                    .font(.custom("Poppins-Bold", size: 48))
                     .foregroundColor(.black)
-                Text("choose a month to sort and delete photos.")
-                    .font(.subheadline)
-                    .foregroundColor(.black)
+//                Text("choose a month to sort and delete photos.")
+//                    .font(.custom("Poppins-Regular", size: 18))
+//                    .foregroundColor(.black)
                 if photoManager.isLoading && photoManager.photoMonths.isEmpty {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .black))
@@ -416,22 +416,35 @@ struct MenuCardView: View {
             let size = min(geo.size.width, geo.size.height)
             Button(action: action) {
                 VStack(alignment: .center, spacing: size * 0.05) {
+//                VStack(alignment: .center) {//VStack(alignment: .center, spacing: size * 0.05) {
+                    
+                    Text("\(emojiForMonth(item.title)) \(item.title)")
+                        .font(.custom("Poppins-Bold", size: 28))
+                        .foregroundColor(.black)
+                       // .kerning(1.5)
+                        //.textCase(item.style.textCase)
+                        .textCase(.lowercase)
+                        //.minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                        .shadow(color: .white.opacity(0.4), radius: 0.5, x: 0, y: 0.5)
+                    
                     if let month = item.month {
                         PolaroidStack(assets: month.assets, maxCount: 3, thumbSize: size * 0.28, emoji: emojiForMonth(item.title))
                             .padding(.top, size * 0.03)
                     }
-                    Text("\(emojiForMonth(item.title)) \(item.title)")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.black)
-                        .kerning(1.5)
-                        .textCase(item.style.textCase)
-                        .minimumScaleFactor(0.5)
-                        .lineLimit(1)
-                        .shadow(color: .white.opacity(0.4), radius: 0.5, x: 0, y: 0.5)
+//                    Text("\(emojiForMonth(item.title)) \(item.title)")
+//                        .font(.custom("Poppins-Bold", size: 28))
+//                        .foregroundColor(.black)
+//                       // .kerning(1.5)
+//                        //.textCase(item.style.textCase)
+//                        .textCase(.lowercase)
+//                        //.minimumScaleFactor(0.5)
+//                        .lineLimit(1)
+//                        .shadow(color: .white.opacity(0.4), radius: 0.5, x: 0, y: 0.5)
                     Text("\(recentsCount) photos")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .font(.custom("Poppins-Regular", size: 18))
                         .foregroundColor(.white)
-                        .minimumScaleFactor(0.5)
+                       // .minimumScaleFactor(0.5)
                         .lineLimit(1)
                         .shadow(color: .black.opacity(0.15), radius: 0.5, x: 0, y: 0.5)
                 }
@@ -637,20 +650,56 @@ struct SwipeablePolaroidStack: View {
                 PolaroidGifCard(
                     gifUrl: gifUrls[idx % gifUrls.count],
                     caption: captions[idx % captions.count],
-                    baseRotation: Double(stackOffset) * 3.0,
-                    cardSize: cardSize
+                    baseRotation: Double(stackOffset) * 2.0,
+                    cardSize: cardSize ?? CGSize(width: 200, height: 240)
                 )
                 .offset(
-                    x: idx == currentIndex ? offset.width : CGFloat(stackOffset) * 8,
-                    y: CGFloat(stackOffset) * 12
+                    x: idx == currentIndex ? offset.width : CGFloat(stackOffset) * 7,
+                    y: CGFloat(stackOffset) * 18
                 )
-                .rotationEffect(.degrees(idx == currentIndex ? Double(offset.width / 12) : Double(stackOffset) * 3.0))
-                .scaleEffect(idx == currentIndex ? 1.0 : 1.0 - CGFloat(stackOffset) * 0.05)
+                .rotationEffect(.degrees(idx == currentIndex ? Double(offset.width / 18) : Double(stackOffset) * 2.0))
+                .scaleEffect(idx == currentIndex ? 1.0 : 1.0 - CGFloat(stackOffset) * 0.04)
                 .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.5), value: offset)
                 .allowsHitTesting(idx == currentIndex)
+                .gesture(
+                    idx == currentIndex ?
+                    DragGesture()
+                        .updating($dragState) { value, state, _ in
+                            state = value.translation
+                        }
+                        .onChanged { gesture in
+                            offset = gesture.translation
+                        }
+                        .onEnded { gesture in
+                            let velocity = gesture.predictedEndTranslation.width - gesture.translation.width
+                            let threshold: CGFloat = 80
+                            if offset.width > threshold || velocity > 150 {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    offset.width = UIScreen.main.bounds.width
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                    currentIndex = (currentIndex + 1) % gifUrls.count
+                                    offset = .zero
+                                }
+                            } else if offset.width < -threshold || velocity < -150 {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    offset.width = -UIScreen.main.bounds.width
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                    currentIndex = (currentIndex + 1) % gifUrls.count
+                                    offset = .zero
+                                }
+                            } else {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    offset = .zero
+                                }
+                            }
+                        }
+                    : nil
+                )
             }
         }
-        .frame(height: cardSize?.height ?? 400)
+        .frame(height: (cardSize?.height ?? 240) + 30)
         .padding(.horizontal, 16)
     }
 }
@@ -671,32 +720,65 @@ struct PolaroidGifCard: View {
     }
     
     var body: some View {
-        let width = cardSize?.width ?? 320
-        let height = cardSize?.height ?? 390
+        let width = cardSize?.width ?? 200
+        let height = cardSize?.height ?? 240
         VStack(spacing: 0) {
-            WebImage(url: URL(string: gifUrl))
-                .resizable()
-                .indicator(.activity)
-                .scaledToFit()
-                .frame(width: width * 0.88, height: width * 0.88)
-                .background(Color.white)
-                .padding(.top, width * 0.06)
-                .padding(.horizontal, width * 0.06)
+            // Polaroid image area
+            ZStack {
+                Color.white
+                WebImage(url: URL(string: gifUrl))
+                    .resizable()
+                    .indicator(.activity)
+                    .scaledToFit()
+                    .frame(width: width * 0.78, height: width * 0.60)
+                    .clipped()
+                    .cornerRadius(width * 0.04)
+            }
+            .frame(width: width * 0.88, height: width * 0.68)
+            .background(Color.white)
+            .cornerRadius(width * 0.05)
+            // Thicker bottom border for polaroid look
+            Rectangle()
+                .fill(Color.white)
+                .frame(width: width * 0.88, height: width * 0.13)
+                .cornerRadius(width * 0.03, corners: [.bottomLeft, .bottomRight])
+            // Caption
             Text(caption)
-                .font(.custom("Bradley Hand", size: max(12, width * 0.13)))
+                .font(.custom("Poppins-Regular", size: max(10, width * 0.10)))
                 .foregroundColor(.black)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, width * 0.06)
-                .padding(.vertical, width * 0.09)
-                .frame(maxWidth: .infinity, minHeight: width * 0.18)
-                .background(Color.white)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .frame(width: width * 0.88)
+                .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
+                .background(Color.white)
         }
         .frame(width: width, height: height)
         .background(Color.white)
-        .cornerRadius(width * 0.025)
-        .shadow(color: Color.black.opacity(0.2), radius: width * 0.03, x: 0, y: width * 0.015)
+        .overlay(
+            RoundedRectangle(cornerRadius: width * 0.03)
+                .stroke(Color.gray.opacity(0.18), lineWidth: 1.2)
+        )
+        .cornerRadius(width * 0.03)
+        .shadow(color: Color.black.opacity(0.18), radius: width * 0.03, x: 0, y: width * 0.015)
         .rotationEffect(.degrees(rotation))
+    }
+}
+
+// Helper for corner radius on specific corners
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape( RoundedCorner(radius: radius, corners: corners) )
+    }
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
     }
 }
 
@@ -712,7 +794,7 @@ struct SwirlyArrowSwipeHint: View {
                     .offset(x: 0, y: 0)
                     .animation(Animation.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: animate)
                 Text("swipe me! ⤵️")
-                    .font(.custom("Bradley Hand", size: 20))
+                    .font(.custom("Poppins-Regular", size: 20))
                     .foregroundColor(.purple)
                     .offset(x: 50, y: 18)
                     .rotationEffect(.degrees(10))
