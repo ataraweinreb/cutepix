@@ -413,10 +413,6 @@ struct MenuCardView: View {
                 ZStack {
                     // Gradient background
                     gradient
-                    // Subtle glassy overlay (very light)
-                    RoundedRectangle(cornerRadius: 36, style: .continuous)
-                        .fill(Color.white.opacity(0.08))
-                        .blur(radius: 0.5)
                     VStack(alignment: .center, spacing: size * 0.06) {
                         // Emoji and month name in a row
                         HStack(spacing: size * 0.04) {
