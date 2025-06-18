@@ -37,57 +37,28 @@ struct PaywallView: View {
     @State private var showFAQ = false
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack {
             Color.black.ignoresSafeArea()
             LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red:0.13, green:0.09, blue:0.23),
-                    Color(red:0.18, green:0.13, blue:0.32),
-                    Color(red:0.22, green:0.09, blue:0.32),
-                    Color(red:0.13, green:0.13, blue:0.23),
-                    Color.purple.opacity(0.7),
-                    Color.blue.opacity(0.7),
-                    Color.pink.opacity(0.7),
-                    Color.black.opacity(0.65)
-                ]),
+                gradient: Gradient(colors: [Color(red:0.13, green:0.09, blue:0.23), Color(red:0.18, green:0.13, blue:0.32), Color(red:0.22, green:0.09, blue:0.32), Color(red:0.13, green:0.13, blue:0.23), Color.purple.opacity(0.7), Color.blue.opacity(0.7), Color.pink.opacity(0.7)]),
                 startPoint: .topLeading,
-                endPoint: .bottom
+                endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            VStack(spacing: 0) {
-                Spacer(minLength: 0)
-                // Remove the card background, just show content
-                VStack(spacing: 0) {
-                    // GIF at the top (smaller)
-                    WebImage(url: URL(string: "https://media.giphy.com/media/XMmf6i3xuKZiPMvNZe/giphy.gif"))
-                        .resizable()
-                        .indicator(.activity)
-                        .scaledToFit()
-                        .frame(height: 110)
-                        .cornerRadius(18)
-                        .shadow(color: Color.black.opacity(0.13), radius: 8, y: 3)
-                        .padding(.top, 32)
-                        .padding(.bottom, 8)
-
-                    // Title
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 32) {
                     Text("Unlock Premium 👑")
                         .font(.custom("Poppins-SemiBold", size: 32))
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
                         .multilineTextAlignment(.center)
-                        .padding(.top, 8)
-                        .padding(.bottom, 2)
-
-                    // Playful subtitle
+                        .padding(.top, 32)
                     Text("Get unlimited swipes and deletes")
                         .font(.custom("Poppins-Medium", size: 20))
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 1)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 18)
-
-                    // Cancel anytime row
+                        .padding(.horizontal, 8)
                     HStack(alignment: .center, spacing: 12) {
                         Image(systemName: "arrow.2.circlepath")
                             .foregroundColor(Color.purple)
@@ -99,11 +70,8 @@ struct PaywallView: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 24)
-
-                    // Subscription Options with pulsing animation
-                    VStack(spacing: 20) {
+                    .padding(.horizontal, 8)
+                    VStack(spacing: 24) {
                         PulsingButton(
                             title: "Try For Free",
                             subtitle: "3 days free, then $1.99/week",
@@ -127,31 +95,24 @@ struct PaywallView: View {
                             disabled: isPurchasing || products.isEmpty
                         )
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 8)
-
-                    // Error
+                    .padding(.horizontal, 0)
                     if let error = purchaseError {
                         Text(error)
                             .foregroundColor(.red)
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
                             .lineLimit(nil)
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 8)
+                            .padding(.horizontal, 8)
                     }
-
-                    // What makes us different
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 18) {
                         Text("What makes us different?")
                             .font(.custom("Poppins-Medium", size: 20))
                             .foregroundColor(.white)
                             .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 1)
-                            .padding(.bottom, 2)
                         HStack(alignment: .top, spacing: 10) {
                             Text("💖")
                                 .font(.system(size: 22))
-                            Text("All photos and data stay on your device and are 100% private")
+                            Text("Your photos are 100% private and stay on your device only")
                                 .font(.custom("Poppins-Regular", size: 16))
                                 .foregroundColor(.white)
                                 .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
@@ -159,7 +120,7 @@ struct PaywallView: View {
                         HStack(alignment: .top, spacing: 10) {
                             Text("💜")
                                 .font(.system(size: 22))
-                            Text("Significantly cheaper than most competitor apps")
+                            Text("Affordable pricing")
                                 .font(.custom("Poppins-Regular", size: 16))
                                 .foregroundColor(.white)
                                 .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
@@ -167,35 +128,19 @@ struct PaywallView: View {
                         HStack(alignment: .top, spacing: 10) {
                             Text("💙")
                                 .font(.system(size: 22))
-                            Text("Built for girls, by girls. Help support women in tech!")
+                            Text("Built by an all-women team!")
                                 .font(.custom("Poppins-Regular", size: 16))
                                 .foregroundColor(.white)
                                 .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
                         }
                     }
-                    .padding(.horizontal, 28)
-                    .padding(.top, 18)
-                    .padding(.bottom, 18)
+                    .padding(.horizontal, 0)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 32)
+                .padding(.horizontal, 24)
+                .padding(.top, 8)
+                .padding(.bottom, 48)
             }
-            // X button in the top corner, overlayed
-            Button(action: { dismiss() }) {
-                Image(systemName: "xmark")
-                    .font(.title2.bold())
-                    .foregroundColor(.white)
-                    .padding(8)
-                    .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
-                    .clipShape(Circle())
-                    .shadow(radius: 2, y: 1)
-            }
-            .padding(.top, 18)
-            .padding(.leading, 18)
-
-            // Restore, FAQ, Terms Of Use links at the bottom
-            VStack {
-                Spacer()
+            .safeAreaInset(edge: .bottom) {
                 HStack {
                     Button(action: restore) {
                         Text("Restore")
@@ -225,7 +170,26 @@ struct PaywallView: View {
                     }
                 }
                 .padding(.horizontal, 32)
-                .padding(.bottom, 8)
+                .padding(.bottom, 10)
+                .background(Color.clear)
+            }
+            // Overlay the X button in the top-left, respecting safe area
+            VStack {
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(.title2.bold())
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
+                            .clipShape(Circle())
+                            .shadow(radius: 2, y: 1)
+                    }
+                    .padding(.top, 18)
+                    .padding(.leading, 18)
+                    Spacer()
+                }
+                Spacer()
             }
         }
         .sheet(isPresented: $showFAQ) {
