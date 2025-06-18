@@ -32,7 +32,9 @@ struct PhotoSwipeView: View {
                 VStack(spacing: 0) {
                     HStack {
                         Button(action: {
-                            handleSessionEnd()
+                            if currentIndex >= month.assets.count {
+                                handleSessionEnd()
+                            }
                             presentationMode.wrappedValue.dismiss()
                         }) {
                             Image(systemName: "arrow.left")
@@ -316,7 +318,7 @@ struct PhotoSwipeView: View {
             }
         }
         .onDisappear {
-            handleSessionEnd()
+            // Removed handleSessionEnd() to prevent showing month complete screen on early dismiss
         }
     }
     
