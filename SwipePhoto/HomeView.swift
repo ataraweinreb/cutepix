@@ -59,39 +59,53 @@ struct HomeView: View {
                         .offset(y: headerHidden ? -120 : 0)
                         .animation(.easeInOut(duration: 0.25), value: headerHidden)
                     if photoManager.authorizationStatus == .denied || photoManager.authorizationStatus == .restricted {
-                        Spacer()
-                        VStack(spacing: 24) {
-                            Text("Hey bestie! 🦄✨\nColor Clean needs access to your photos to help you clean your camera roll. 📸🧼")
-                                .font(.custom("Poppins-Bold", size: 20))
-                                .foregroundColor(.black)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                                .padding(.top, 8)
-                                .fixedSize(horizontal: false, vertical: true)
-                            GradientWideButton(title: "Open Settings", gradient: LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing)) {
-                                if let url = URL(string: UIApplication.openSettingsURLString) {
-                                    UIApplication.shared.open(url)
-                                }
+                        ZStack {
+                            Color.clear // for layout
+                            VStack(spacing: 36) {
+                                Text("Hey bestie! 🦄✨")
+                                    .font(.custom("Poppins-Bold", size: 28))
+                                    .foregroundColor(.white)
+                                    .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 2)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 8)
+                                Text("Color Clean needs access to your photos to help you clean your camera roll. 📸🧼")
+                                    .font(.custom("Poppins-Regular", size: 18))
+                                    .foregroundColor(.white)
+                                    .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 2)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 8)
+                                Image("camera-permissions")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: 340, maxHeight: 220)
+                                    .shadow(color: .black.opacity(0.18), radius: 16, x: 0, y: 6)
+                                    .padding(.vertical, 16)
+                                PulsingButton(
+                                    title: "Open Settings",
+                                    subtitle: "",
+                                    gradient: LinearGradient(
+                                        gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    action: {
+                                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                                            UIApplication.shared.open(url)
+                                        }
+                                    },
+                                    disabled: false
+                                )
+                                .frame(height: 72)
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal, 0)
+                                .padding(.bottom, 0)
+                                .shadow(color: Color.black.opacity(0.28), radius: 14, x: 0, y: 7)
+                                .shadow(color: Color.yellow.opacity(0.18), radius: 10, x: 0, y: 3)
                             }
-                            SwipeablePolaroidStack(
-                                gifUrls: [
-                                    "https://media.giphy.com/media/3o7aTvhUAeRLAVx8vm/giphy.gif",
-                                    "https://media.giphy.com/media/TydZAW0DVCbGE/giphy.gif",
-                                    "https://media.giphy.com/media/ydttw7Bg2tHVHecInE/giphy.gif"
-                                ],
-                                captions: [
-                                    "No photos? 😭 My heart is breaking!",
-                                    "Please let me help clean your camera roll! 🥺",
-                                    "I promise I'll be gentle with your memories! 💕"
-                                ]
-                            )
-                            Text("swipe me! ⬆️")
-                                .font(.custom("Poppins-Regular", size: 22))
-                                .foregroundColor(.purple)
-                                .padding(.top, 4)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 32)
+                            Spacer(minLength: 0)
                         }
-                        .frame(maxWidth: .infinity)
-                        Spacer()
                     } else {
 //                        Button("Show Paywall (Test)") { showPaywall = true }
 //                            .padding(.bottom, 8)

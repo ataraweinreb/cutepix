@@ -12,7 +12,7 @@ struct SettingsFAQView: View {
     @Environment(\.presentationMode) var presentationMode
     let faqCards: [FAQCard] = [
         FAQCard(
-            memeUrl: nil,
+            memeUrl: "https://media.giphy.com/media/3o7aTvhUAeRLAVx8vm/giphy.gif",
             question: "Who built this app?",
             answer: "Just a girl like you who loves Taylor Swift, pink, and sparkles ✨"
         ),
