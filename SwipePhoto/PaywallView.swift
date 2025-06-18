@@ -47,18 +47,22 @@ struct PaywallView: View {
             .ignoresSafeArea()
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 32) {
-                    Text("Unlock Premium 👑")
-                        .font(.custom("Poppins-SemiBold", size: 32))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 32)
-                    Text("Get unlimited swipes and deletes")
-                        .font(.custom("Poppins-Medium", size: 20))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 1)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 8)
+                    
+                    VStack(spacing: 12) {
+                        Text("Unlock Premium 👑")
+                            .font(.custom("Poppins-SemiBold", size: 32))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 54)
+                        Text("Get unlimited swipes and deletes")
+                            .font(.custom("Poppins-Medium", size: 20))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 1)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 8)
+                    }
+                    
                     HStack(alignment: .center, spacing: 12) {
                         Image(systemName: "arrow.2.circlepath")
                             .foregroundColor(Color.purple)

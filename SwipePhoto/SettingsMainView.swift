@@ -6,7 +6,6 @@ struct SettingsMainView: View {
     @State private var showShareSheet = false
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
             LinearGradient(
                 gradient: Gradient(colors: [
                     Color(red:0.13, green:0.09, blue:0.23),
@@ -15,42 +14,50 @@ struct SettingsMainView: View {
                     Color(red:0.13, green:0.13, blue:0.23),
                     Color.purple.opacity(0.7),
                     Color.blue.opacity(0.7),
-                    Color.pink.opacity(0.7),
-                    Color.black.opacity(0.65)
+                    Color.pink.opacity(0.7)
                 ]),
                 startPoint: .topLeading,
-                endPoint: .bottom
+                endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
             VStack(spacing: 0) {
                 HStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
                         Image(systemName: "xmark")
-                            .font(.custom("Poppins-Bold", size: 22))
+                            .font(.title2.bold())
                             .foregroundColor(.white)
                             .padding(8)
-                            .background(Color.black.opacity(0.32))
+                            .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
                             .clipShape(Circle())
                             .shadow(radius: 2, y: 1)
                     }
-                    Spacer()
-                    Text("Settings")
-                        .font(.custom("Poppins-Bold", size: 32))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
-                        .multilineTextAlignment(.center)
+                    .padding(.top, 18)
+                    .padding(.leading, 18)
                     Spacer()
                 }
-                .padding(.top, 18)
-                .padding(.horizontal, 18)
-                VStack(spacing: 16) {
+                Text("Settings")
+                    .font(.custom("Poppins-SemiBold", size: 32))
+                    .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 18)
+                    .padding(.bottom, 18)
+                VStack(spacing: 24) {
                     GradientWideButton(
                         title: "FAQ 🙋‍♀️",
-                        gradient: LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                        gradient: LinearGradient(
+                            gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     ) { showFAQ = true }
                     GradientWideButton(
                         title: "Leave us a review 🌟",
-                        gradient: LinearGradient(gradient: Gradient(colors: [Color.pink, Color.orange]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                        gradient: LinearGradient(
+                            gradient: Gradient(colors: [Color(red:0.2, green:0.6, blue:1.0), Color(red:1.0, green:0.0, blue:0.6)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     ) {
                         if let url = URL(string: "https://apps.apple.com/app/idYOUR_APP_ID?action=write-review") {
                             UIApplication.shared.open(url)
@@ -69,12 +76,10 @@ struct SettingsMainView: View {
                         }
                     }
                 }
-                .padding(.top, 32)
+                .padding(.top, 16)
                 .padding(.horizontal, 18)
                 Spacer()
             }
-            .frame(maxWidth: 500)
-            .padding(.bottom, 32)
             .sheet(isPresented: $showFAQ) {
                 SettingsFAQView()
             }
