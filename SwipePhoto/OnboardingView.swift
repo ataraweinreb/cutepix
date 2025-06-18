@@ -19,69 +19,49 @@ struct OnboardingView: View {
             
             VStack(spacing: 0) {
                 Spacer().frame(height: 44)
-                // Frosted glass card with all content inside
-                ZStack {
-                    RoundedRectangle(cornerRadius: 36, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.white.opacity(0.04), Color.purple.opacity(0.10)]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
-                        .shadow(color: Color.purple.opacity(0.35), radius: 24, x: 0, y: 12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 36)
-                                .stroke(Color.white.opacity(0.13), lineWidth: 1.5)
-                        )
-                    VStack(spacing: 30) {
-                        Text("Welcome to Color Clean! ✨")
-                            .font(.custom("Poppins-Bold", size: 32))
-                            .foregroundColor(.white)
-                            .shadow(color: .black.opacity(0.7), radius: 4, x: 0, y: 2)
-                            .multilineTextAlignment(.center)
-                        Text("The playful, girly way to clean your camera roll 💖")
-                            .font(.custom("Poppins-SemiBold", size: 18))
-                            .foregroundColor(.white.opacity(0.95))
-                            .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
-                            .multilineTextAlignment(.center)
-                        // Polaroid stack in the middle of the card
-                        OnboardingPolaroidStack(onFinish: onFinish)
-                            .frame(height: 220)
-                            .shadow(color: .cyan.opacity(0.25), radius: 16, x: 0, y: 8)
-                            .padding(.vertical, 8)
-                        Text("Swipe through your photos, keep the best, and delete the rest. Let's get started!")
-                            .font(.custom("Poppins-Medium", size: 16))
-                            .foregroundColor(.white.opacity(0.92))
-                            .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
-                            .multilineTextAlignment(.center)
-                        // Get Started button inside the card with pulse animation
-                        GradientWideButton(
-                            title: "Get Started",
-                            gradient: LinearGradient(
-                                gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        ) {
+                VStack(spacing: 30) {
+                    Text("Welcome to Color Clean! ✨")
+                        .font(.custom("Poppins-Bold", size: 32))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.7), radius: 4, x: 0, y: 2)
+                        .multilineTextAlignment(.center)
+                    Text("The playful, girly way to clean your camera roll 💖")
+                        .font(.custom("Poppins-SemiBold", size: 18))
+                        .foregroundColor(.white.opacity(0.95))
+                        .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
+                        .multilineTextAlignment(.center)
+                    OnboardingPolaroidStack(onFinish: onFinish)
+                        .frame(height: 220)
+                        .shadow(color: .cyan.opacity(0.25), radius: 16, x: 0, y: 8)
+                        .padding(.vertical, 8)
+                    PulsingButton(
+                        title: "Get Started",
+                        subtitle: "",
+                        gradient: LinearGradient(
+                            gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        action: {
                             playerHolder.player.pause()
                             playerHolder.player.seek(to: .zero)
                             DispatchQueue.main.async {
                                 onFinish()
                             }
-                        }
-                        .frame(height: 88)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 28)
-                        .padding(.horizontal, -8)
-                        .shadow(color: Color.black.opacity(0.28), radius: 14, x: 0, y: 7)
-                        .shadow(color: Color.yellow.opacity(0.18), radius: 10, x: 0, y: 3)
-                    }
-                    .padding(.vertical, 36)
-                    .padding(.horizontal, 24)
+                        },
+                        disabled: false
+                    )
+                    .frame(height: 72)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 32)
+                    .padding(.horizontal, 0)
+                    .shadow(color: Color.black.opacity(0.28), radius: 14, x: 0, y: 7)
+                    .shadow(color: Color.yellow.opacity(0.18), radius: 10, x: 0, y: 3)
                 }
+                .padding(.vertical, 36)
+                .padding(.horizontal, 24)
+                .frame(maxWidth: 500)
+                .shadow(color: Color.black.opacity(0.18), radius: 32, x: 0, y: 12)
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
                 .padding(.bottom, 40)
