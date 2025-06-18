@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import SDWebImageSwiftUI
 
 struct PhotoSwipeView: View {
     let month: PhotoMonth
@@ -118,17 +119,6 @@ struct PhotoSwipeView: View {
                         .padding(.vertical, 4)
                     }
                     Spacer(minLength: 0)
-                    if currentIndex >= month.assets.count && !month.assets.isEmpty && !isDeleting && !showDeleted {
-                        Button(action: {
-                            handleSessionEnd()
-                        }) {
-                            Text("All done! Tap to delete \(assetsToDelete.count) photos")
-                                .font(.largeTitle)
-                                .foregroundColor(.white)
-                                .padding(.top, 40)
-                        }
-                    }
-                    Spacer(minLength: 0)
                     if !showDeleted {
                         HStack(spacing: 32) {
                             Spacer()
@@ -207,37 +197,99 @@ struct PhotoSwipeView: View {
             // Overlay for centered confetti and message
             if showDeleted {
                 ZStack {
-                    Color.black.opacity(0.85).ignoresSafeArea()
+                    // Dark rainbow gradient background
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color(red:0.18, green:0.09, blue:0.32), // deep purple
+                            Color(red:0.22, green:0.09, blue:0.32), // indigo
+                            Color(red:0.13, green:0.13, blue:0.23), // midnight blue
+                            Color(red:0.35, green:0.13, blue:0.32), // magenta
+                            Color(red:0.09, green:0.18, blue:0.32), // dark teal
+                            Color(red:0.25, green:0.09, blue:0.32)  // more purple
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ).ignoresSafeArea()
+                    Color.black.opacity(0.38).ignoresSafeArea() // Slightly stronger overlay for contrast
                     VStack(spacing: 24) {
-                        if showConfetti {
-                            ConfettiView()
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .transition(.opacity)
-                        }
-                        Text("All done!\nYou finished this stack!")
-                            .font(.custom("Poppins-Bold", size: 36))
+                        Spacer(minLength: 40)
+                        WebImage(url: URL(string: "https://media.giphy.com/media/3oz8xAFtqoOUUrsh7W/giphy.gif"))
+                            .resizable()
+                            .indicator(.activity)
+                            .scaledToFit()
+                            .frame(maxWidth: 220, maxHeight: 120)
+                            .clipped()
+                        Text("\(month.title) complete!")
+                            .font(.custom("Poppins-SemiBold", size: 28))
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
-                            .lineLimit(nil)
+                            .shadow(color: .black.opacity(0.95), radius: 8, x: 0, y: 4)
+                            .padding(.top, 24)
+                        
+                        Text("Nice work bestie, you're the GOAT 🐐")
+                            .font(.custom("Poppins-Regular", size: 20))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .shadow(color: .black.opacity(0.95), radius: 6, x: 0, y: 2)
                             .padding(.horizontal, 24)
-                            .padding(.vertical, 8)
-                            .background(Color.black.opacity(0.5))
-                            .cornerRadius(20)
-                        HStack(spacing: 32) {
-                            CounterCircle(label: "DELETE", count: deleteCount, gradient: Gradient(colors: [Color.purple, Color.pink]))
-                            CounterCircle(label: "KEEP", count: keepCount, gradient: Gradient(colors: [Color.green, Color.teal]))
+                        
+                        if !assetsToDelete.isEmpty {
+                            ScrollView {
+                                let columns = [GridItem(.adaptive(minimum: 90, maximum: 120), spacing: 14)]
+                                LazyVGrid(columns: columns, spacing: 14) {
+                                    ForEach(assetsToDelete, id: \ .localIdentifier) { asset in
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 18)
+                                                .fill(Color.white)
+                                                .shadow(color: Color.black.opacity(0.10), radius: 6, x: 0, y: 2)
+                                            PhotoCard(asset: asset)
+                                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                                                .padding(6)
+                                        }
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 18)
+                                                .stroke(LinearGradient(gradient: Gradient(colors: [Color.purple, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 3)
+                                        )
+                                        .frame(width: 100, height: 100)
+                                    }
+                                }
+                                .padding(.horizontal, 12)
+                            }
+                            .frame(maxHeight: 200)
                         }
+                        
+                        Button(action: {
+                            presentationMode.wrappedValue.dismiss()
+                            if !assetsToDelete.isEmpty {
+                                onBatchDelete?()
+                            }
+                        }) {
+                            Text("Return to Home")
+                                .font(.custom("Poppins-SemiBold", size: 22))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 18)
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color(red:1.0, green:0.0, blue:0.6),
+                                            Color.yellow,
+                                            Color(red:0.0, green:0.6, blue:1.0)
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .cornerRadius(18)
+                                .shadow(color: Color.yellow.opacity(0.18), radius: 10, x: 0, y: 3)
+                                .padding(.horizontal, 32)
+                        }
+                        .padding(.top, 12)
+                        Spacer(minLength: 40)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                }
-                .onAppear {
-                    withAnimation(.easeIn(duration: 0.3)) {
-                        showConfetti = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now()) {
-                        presentationMode.wrappedValue.dismiss()
-                        onBatchDelete?()
-                    }
+                    .frame(maxWidth: 500)
+                    .padding(.vertical, 24)
+                    .padding(.bottom, 24)
                 }
             }
             if showPaywall {
@@ -286,19 +338,27 @@ struct PhotoSwipeView: View {
         if currentIndex < month.assets.count - 1 {
             currentIndex += 1
         } else {
-            currentIndex += 1 // To show "All done!"
+            currentIndex += 1 // To show confirmation
+            handleSessionEnd() // Automatically show confirmation screen
         }
     }
     
     func handleSessionEnd() {
-        guard !assetsToDelete.isEmpty, !isDeleting, !showDeleted else { return }
-        isDeleting = true
-        deleteBatch(assets: assetsToDelete) {
-            isDeleting = false
+        guard !isDeleting, !showDeleted else { return }
+        
+        if !assetsToDelete.isEmpty {
+            // If there are photos to delete, delete them first
+            isDeleting = true
+            deleteBatch(assets: assetsToDelete) {
+                isDeleting = false
+                showDeleted = true
+                assetsToDelete.removeAll()
+                // Notify parent to refresh
+                onBatchDelete?()
+            }
+        } else {
+            // If no photos to delete, just show the confirmation screen
             showDeleted = true
-            assetsToDelete.removeAll()
-            // Notify parent to refresh
-            onBatchDelete?()
         }
     }
     
