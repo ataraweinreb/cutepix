@@ -27,174 +27,182 @@ struct PhotoSwipeView: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            VStack {
-                HStack {
-                    Button(action: {
-                        handleSessionEnd()
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .font(.title)
+            GeometryReader { geo in
+                VStack(spacing: 0) {
+                    HStack {
+                        Button(action: {
+                            handleSessionEnd()
+                            presentationMode.wrappedValue.dismiss()
+                        }) {
+                            Image(systemName: "arrow.left")
+                                .font(.title)
+                                .foregroundColor(.white)
+                        }
+                        Text(month.title)
+                            .font(.custom("Poppins-SemiBold", size: 24))
                             .foregroundColor(.white)
-                    }
-                    Text(month.title)
-                        .font(.custom("Poppins-Bold", size: 28))
-                        .foregroundColor(.white)
-                    Spacer()
-                    Text("\(min(currentIndex+1, month.assets.count))/\(month.assets.count)")
-                        .foregroundColor(.white)
-                        .font(.custom("Poppins-Regular", size: 18))
-                }
-                .padding()
-                
-                Spacer()
-                
-                if isDeleting {
-                    Color.black.opacity(0.7).ignoresSafeArea()
-                    VStack(spacing: 20) {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(2)
-                        Text("Deleting photos...")
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        Spacer()
+                        Text("\(min(currentIndex+1, month.assets.count))/\(month.assets.count)")
                             .foregroundColor(.white)
-                            .font(.custom("Poppins-Regular", size: 22))
+                            .font(.custom("Poppins-Regular", size: 16))
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(Rectangle())
-                    .allowsHitTesting(true)
-                } else if month.assets.isEmpty {
-                    Text("No photos in this month!")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                        .padding()
-                } else if !showDeleted {
-                    ZStack {
-                        ForEach((currentIndex..<min(currentIndex+2, month.assets.count)).reversed(), id: \.self) { idx in
-                            PhotoCard(
-                                asset: month.assets[idx],
-                                offset: idx == currentIndex ? offset : .zero,
-                                overlayText: idx == currentIndex ? overlayText : nil
-                            )
-                            .offset(x: idx == currentIndex ? offset.width : 0, y: CGFloat(idx - currentIndex) * 10)
-                            .rotationEffect(.degrees(idx == currentIndex ? Double(offset.width / 12) : 0))
-                            .scaleEffect(idx == currentIndex ? 1.0 : 0.96)
-                            .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.5), value: offset)
-                            .allowsHitTesting(idx == currentIndex && !buttonActionInProgress && canSwipe)
-                            .gesture(
-                                idx == currentIndex && canSwipe ?
-                                DragGesture()
-                                    .updating($dragState) { value, state, _ in
-                                        state = value.translation
-                                    }
-                                    .onChanged { gesture in
-                                        offset = gesture.translation
-                                    }
-                                    .onEnded { gesture in
-                                        let velocity = gesture.predictedEndTranslation.width - gesture.translation.width
-                                        let threshold: CGFloat = 100
-                                        let shouldKeep = offset.width > threshold || velocity > 200
-                                        let shouldDelete = offset.width < -threshold || velocity < -200
-                                        if shouldKeep {
-                                            animateKeep()
-                                        } else if shouldDelete {
-                                            animateDelete()
-                                        } else {
-                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                                offset = .zero
+                    .padding(.horizontal, 12)
+                    .padding(.top, geo.safeAreaInsets.top + 8)
+                    .padding(.bottom, 4)
+                    Spacer(minLength: 0)
+                    if isDeleting {
+                        Color.black.opacity(0.7).ignoresSafeArea()
+                        VStack(spacing: 20) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(2)
+                            Text("Deleting photos...")
+                                .foregroundColor(.white)
+                                .font(.custom("Poppins-Regular", size: 20))
+                                .lineLimit(nil)
+                                .minimumScaleFactor(0.7)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
+                        .allowsHitTesting(true)
+                    } else if month.assets.isEmpty {
+                        Text("No photos in this month!")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                            .padding()
+                    } else if !showDeleted {
+                        ZStack {
+                            ForEach((currentIndex..<min(currentIndex+2, month.assets.count)).reversed(), id: \.self) { idx in
+                                PhotoCard(
+                                    asset: month.assets[idx],
+                                    offset: idx == currentIndex ? offset : .zero,
+                                    overlayText: idx == currentIndex ? overlayText : nil
+                                )
+                                .offset(x: idx == currentIndex ? offset.width : 0, y: CGFloat(idx - currentIndex) * 10)
+                                .rotationEffect(.degrees(idx == currentIndex ? Double(offset.width / 12) : 0))
+                                .scaleEffect(idx == currentIndex ? 1.0 : 0.96)
+                                .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.5), value: offset)
+                                .allowsHitTesting(idx == currentIndex && !buttonActionInProgress && canSwipe)
+                                .gesture(
+                                    idx == currentIndex && canSwipe ?
+                                    DragGesture()
+                                        .updating($dragState) { value, state, _ in
+                                            state = value.translation
+                                        }
+                                        .onChanged { gesture in
+                                            offset = gesture.translation
+                                        }
+                                        .onEnded { gesture in
+                                            let velocity = gesture.predictedEndTranslation.width - gesture.translation.width
+                                            let threshold: CGFloat = 100
+                                            let shouldKeep = offset.width > threshold || velocity > 200
+                                            let shouldDelete = offset.width < -threshold || velocity < -200
+                                            if shouldKeep {
+                                                animateKeep()
+                                            } else if shouldDelete {
+                                                animateDelete()
+                                            } else {
+                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                    offset = .zero
+                                                }
                                             }
                                         }
-                                    }
-                                : nil
-                            )
+                                    : nil
+                                )
+                            }
                         }
+                        .frame(height: min(geo.size.height * 0.45, 340))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                     }
-                    .frame(height: 500)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                }
-                
-                if currentIndex >= month.assets.count && !month.assets.isEmpty && !isDeleting && !showDeleted {
-                    Button(action: {
-                        handleSessionEnd()
-                    }) {
-                        Text("All done! Tap to delete \(assetsToDelete.count) photos")
-                            .font(.largeTitle)
-                            .foregroundColor(.white)
-                            .padding(.top, 40)
-                    }
-                }
-                
-                Spacer()
-                
-                if !showDeleted {
-                    HStack(spacing: 32) {
-                        Spacer()
+                    Spacer(minLength: 0)
+                    if currentIndex >= month.assets.count && !month.assets.isEmpty && !isDeleting && !showDeleted {
                         Button(action: {
-                            if !buttonActionInProgress && currentIndex < month.assets.count && canSwipe {
-                                deletePressed = true
-                                animateDelete()
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { deletePressed = false }
-                            }
+                            handleSessionEnd()
                         }) {
-                            VStack(spacing: 6) {
-                                Text("DELETE")
-                                    .font(.custom("Poppins-Bold", size: 22))
-                                    .foregroundColor(.white)
-                                Text("\(deleteCount)")
-                                    .font(.custom("Poppins-Bold", size: 32))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 8)
-                                    .background(Color.white.opacity(0.15))
-                                    .clipShape(Capsule())
-                            }
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 18)
-                            .background(
-                                LinearGradient(gradient: Gradient(colors: [Color.purple, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                            )
-                            .clipShape(Capsule())
-                            .shadow(color: Color.purple.opacity(0.3), radius: 10, x: 0, y: 4)
-                            .scaleEffect(deletePressed ? 0.93 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: deletePressed)
+                            Text("All done! Tap to delete \(assetsToDelete.count) photos")
+                                .font(.largeTitle)
+                                .foregroundColor(.white)
+                                .padding(.top, 40)
                         }
-                        .disabled(buttonActionInProgress || currentIndex >= month.assets.count || !canSwipe)
-                        Spacer()
-                        Button(action: {
-                            if !buttonActionInProgress && currentIndex < month.assets.count && canSwipe {
-                                keepPressed = true
-                                animateKeep()
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { keepPressed = false }
-                            }
-                        }) {
-                            VStack(spacing: 6) {
-                                Text("KEEP")
-                                    .font(.custom("Poppins-Bold", size: 22))
-                                    .foregroundColor(.white)
-                                Text("\(keepCount)")
-                                    .font(.custom("Poppins-Bold", size: 32))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 8)
-                                    .background(Color.white.opacity(0.15))
-                                    .clipShape(Capsule())
-                            }
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 18)
-                            .background(
-                                LinearGradient(gradient: Gradient(colors: [Color.green, Color.teal]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                            )
-                            .clipShape(Capsule())
-                            .shadow(color: Color.green.opacity(0.3), radius: 10, x: 0, y: 4)
-                            .scaleEffect(keepPressed ? 0.93 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: keepPressed)
-                        }
-                        .disabled(buttonActionInProgress || currentIndex >= month.assets.count || !canSwipe)
-                        Spacer()
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.bottom, 30)
+                    Spacer(minLength: 0)
+                    if !showDeleted {
+                        HStack(spacing: 32) {
+                            Spacer()
+                            Button(action: {
+                                if !buttonActionInProgress && currentIndex < month.assets.count && canSwipe {
+                                    deletePressed = true
+                                    animateDelete()
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { deletePressed = false }
+                                }
+                            }) {
+                                VStack(spacing: 6) {
+                                    Text("DELETE")
+                                        .font(.custom("Poppins-SemiBold", size: 18))
+                                        .foregroundColor(.white)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.7)
+                                    Text("\(deleteCount)")
+                                        .font(.custom("Poppins-SemiBold", size: 28))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 0)
+                                        .padding(.vertical, 0)
+                                        .background(Color.white.opacity(0.15))
+                                        .clipShape(Capsule())
+                                }
+                                .frame(width: min(geo.size.width * 0.36, 140), height: min(geo.size.width * 0.36, 140))
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color.purple, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                )
+                                .clipShape(Circle())
+                                .shadow(color: Color.purple.opacity(0.3), radius: 8, x: 0, y: 3)
+                                .scaleEffect(deletePressed ? 0.93 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: deletePressed)
+                            }
+                            .disabled(buttonActionInProgress || currentIndex >= month.assets.count || !canSwipe)
+                            Spacer()
+                            Button(action: {
+                                if !buttonActionInProgress && currentIndex < month.assets.count && canSwipe {
+                                    keepPressed = true
+                                    animateKeep()
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { keepPressed = false }
+                                }
+                            }) {
+                                VStack(spacing: 6) {
+                                    Text("KEEP")
+                                        .font(.custom("Poppins-SemiBold", size: 18))
+                                        .foregroundColor(.white)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.7)
+                                    Text("\(keepCount)")
+                                        .font(.custom("Poppins-SemiBold", size: 28))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 0)
+                                        .padding(.vertical, 0)
+                                        .background(Color.white.opacity(0.15))
+                                        .clipShape(Capsule())
+                                }
+                                .frame(width: min(geo.size.width * 0.36, 140), height: min(geo.size.width * 0.36, 140))
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color.green, Color.teal]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                )
+                                .clipShape(Circle())
+                                .shadow(color: Color.green.opacity(0.3), radius: 8, x: 0, y: 3)
+                                .scaleEffect(keepPressed ? 0.93 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: keepPressed)
+                            }
+                            .disabled(buttonActionInProgress || currentIndex >= month.assets.count || !canSwipe)
+                            Spacer()
+                        }
+                        .frame(minWidth: 0, maxWidth: .infinity)
+                        .padding(.horizontal, 0)
+                        .padding(.bottom, geo.safeAreaInsets.bottom + 18)
+                    }
                 }
+                .frame(width: geo.size.width, height: geo.size.height)
             }
             // Overlay for centered confetti and message
             if showDeleted {
