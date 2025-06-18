@@ -16,6 +16,7 @@ struct HomeView: View {
     @AppStorage("isPremium") private var isPremium: Bool = false
     @AppStorage("totalSwipes") private var totalSwipes: Int = 0
     @AppStorage("hasSeenPaywall") private var hasSeenPaywall: Bool = false
+    @State private var showFAQ = false
     
     let rainbowGradients: [LinearGradient] = [
         // 1. Hot pink → peach
@@ -49,21 +50,66 @@ struct HomeView: View {
             ZStack {
                 Color.black.ignoresSafeArea()
                 LinearGradient(
-                    gradient: Gradient(colors: [Color(red:0.13, green:0.09, blue:0.23), Color(red:0.18, green:0.13, blue:0.32), Color(red:0.22, green:0.09, blue:0.32), Color(red:0.13, green:0.13, blue:0.23), Color.purple.opacity(0.7), Color.blue.opacity(0.7), Color.pink.opacity(0.7)]),
+                    gradient: Gradient(colors: [
+                        Color(red:0.13, green:0.09, blue:0.23),
+                        Color(red:0.18, green:0.13, blue:0.32),
+                        Color(red:0.22, green:0.09, blue:0.32),
+                        Color(red:0.13, green:0.13, blue:0.23),
+                        Color.purple.opacity(0.7),
+                        Color.blue.opacity(0.7),
+                        Color.pink.opacity(0.7)
+                    ]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
                 VStack(spacing: 0) {
-                    headerView
-                        .offset(y: headerHidden ? -120 : 0)
-                        .animation(.easeInOut(duration: 0.25), value: headerHidden)
+                    HStack(alignment: .center) {
+                        Button(action: { showFAQ = true }) {
+                            Image(systemName: "questionmark.circle")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 44, height: 44)
+                                .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
+                                .clipShape(Circle())
+                                .shadow(radius: 2, y: 1)
+                        }
+                        .padding(.leading, 14)
+                        .sheet(isPresented: $showFAQ) {
+                            SettingsFAQView()
+                        }
+                        Spacer()
+                        Text("Color Clean")
+                            .font(.custom("Poppins-SemiBold", size: 32))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                        Button(action: { showSettings = true }) {
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 44, height: 44)
+                                .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
+                                .clipShape(Circle())
+                                .shadow(radius: 2, y: 1)
+                        }
+                        .padding(.trailing, 14)
+                        .sheet(isPresented: $showSettings) {
+                            SettingsMainView()
+                        }
+                    }
+                    .frame(height: 80)
+                    .padding(.horizontal, 14)
+                    Divider()
+                        .frame(height: 1)
+                        .background(Color.white.opacity(0.09))
                     if photoManager.authorizationStatus == .denied || photoManager.authorizationStatus == .restricted {
                         ZStack {
                             Color.clear // for layout
                             VStack(spacing: 36) {
                                 Text("Hey bestie! 🦄✨")
-                                    .font(.custom("Poppins-Bold", size: 28))
+                                    .font(.custom("Poppins-SemiBold", size: 28))
                                     .foregroundColor(.white)
                                     .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 2)
                                     .multilineTextAlignment(.center)
@@ -134,7 +180,7 @@ struct HomeView: View {
                                 }
                             }
                         }
-                        .padding(.vertical, 40)
+                        .padding(.vertical, 24)
                         .padding(.horizontal, 14)
                     }
                     .onPreferenceChange(ScrollOffsetKey.self) { value in
@@ -171,29 +217,6 @@ struct HomeView: View {
                 showOnboarding = false
             }
         }
-    }
-    
-    var headerView: some View {
-        HStack(alignment: .center) {
-            Text("Color Clean")
-                .font(.custom("Poppins-Bold", size: 24))
-                .foregroundColor(.white)
-                .shadow(color: .black.opacity(0.7), radius: 3, x: 0, y: 1)
-                .padding(.leading, 4)
-            Spacer()
-            Button(action: { showSettings = true }) {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 38, height: 38)
-            }
-            .sheet(isPresented: $showSettings) {
-                SettingsMainView()
-            }
-        }
-        .padding(.top, 4)
-        .padding(.bottom, 2)
-        .padding(.horizontal, 10)
     }
     
     var menuItems: [MenuItem] {
