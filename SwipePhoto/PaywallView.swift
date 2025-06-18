@@ -98,6 +98,16 @@ struct PaywallView: View {
                             action: { purchasePlan(weekly: false) },
                             disabled: isPurchasing || products.isEmpty
                         )
+                        // Debug bypass paywall button
+                        Button(action: {
+                            isPremium = true
+                            onUnlock?()
+                        }) {
+                            Text("Bypass Paywall")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.yellow)
+                                .padding(.top, 8)
+                        }
                     }
                     .padding(.horizontal, 0)
                     if let error = purchaseError {
