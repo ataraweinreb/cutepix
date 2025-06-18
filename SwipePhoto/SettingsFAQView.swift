@@ -39,7 +39,6 @@ struct SettingsFAQView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Color.black.ignoresSafeArea()
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color(red:0.13, green:0.09, blue:0.23),
@@ -48,67 +47,89 @@ struct SettingsFAQView: View {
                         Color(red:0.13, green:0.13, blue:0.23),
                         Color.purple.opacity(0.7),
                         Color.blue.opacity(0.7),
-                        Color.pink.opacity(0.7),
-                        Color.black.opacity(0.65)
+                        Color.pink.opacity(0.7)
                     ]),
                     startPoint: .topLeading,
-                    endPoint: .bottom
+                    endPoint: .bottomTrailing
                 )
-                .ignoresSafeArea(edges: .all)
-                VStack(spacing: 32) {
+                .ignoresSafeArea()
+                VStack(spacing: 0) {
                     HStack {
                         Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                            Image(systemName: "arrow.left")
-                                .font(.custom("Poppins-Bold", size: 22))
+                            Image(systemName: "xmark")
+                                .font(.title2.bold())
                                 .foregroundColor(.white)
                                 .padding(8)
-                                .background(Color.black.opacity(0.32))
+                                .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
                                 .clipShape(Circle())
                                 .shadow(radius: 2, y: 1)
                         }
+                        .padding(.top, 18)
+                        .padding(.leading, 18)
                         Spacer()
                     }
-                    .padding(.top, 18)
-                    .padding(.leading, 18)
                     Text("Swipe for FAQ")
-                        .font(.custom("Poppins-Bold", size: 32))
+                        .font(.custom("Poppins-SemiBold", size: 32))
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
                         .multilineTextAlignment(.center)
-                        .padding(.top, 8)
-                    Spacer(minLength: 0)
+                        .padding(.top, 12)
+                        .padding(.bottom, 10)
                     SwipeableFAQStack(faqCards: faqCards, currentIndex: $currentIndex, offset: $offset, dragState: dragState)
-                    HStack(spacing: 40) {
-                        Button(action: {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                currentIndex = (currentIndex - 1 + faqCards.count) % faqCards.count
-                                offset = .zero
-                            }
-                        }) {
-                            Image(systemName: "chevron.left.circle.fill")
-                                .resizable()
-                                .frame(width: max(36, UIScreen.main.bounds.width * 0.12), height: max(36, UIScreen.main.bounds.width * 0.12))
+                        .padding(.top, 4)
+                    HStack(spacing: 32) {
+                        Button(action: previousCard) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 32, weight: .bold))
                                 .foregroundColor(.white)
-                                .shadow(radius: 4, y: 2)
+                                .frame(width: 56, height: 56)
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.13), radius: 8, x: 0, y: 4)
                         }
-                        Button(action: {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                currentIndex = (currentIndex + 1) % faqCards.count
-                                offset = .zero
-                            }
-                        }) {
-                            Image(systemName: "chevron.right.circle.fill")
-                                .resizable()
-                                .frame(width: max(36, UIScreen.main.bounds.width * 0.12), height: max(36, UIScreen.main.bounds.width * 0.12))
+                        Button(action: nextCard) {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 32, weight: .bold))
                                 .foregroundColor(.white)
-                                .shadow(radius: 4, y: 2)
+                                .frame(width: 56, height: 56)
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.13), radius: 8, x: 0, y: 4)
                         }
                     }
+                    .padding(.top, 0)
+                    Spacer()
                 }
                 .frame(maxWidth: 600)
                 .padding(.horizontal, 0)
                 .padding(.bottom, geo.safeAreaInsets.bottom)
             }
+        }
+    }
+    
+    private func previousCard() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            currentIndex = (currentIndex - 1 + faqCards.count) % faqCards.count
+            offset = .zero
+        }
+    }
+    
+    private func nextCard() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            currentIndex = (currentIndex + 1) % faqCards.count
+            offset = .zero
         }
     }
 }
