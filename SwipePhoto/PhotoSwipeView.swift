@@ -24,6 +24,7 @@ struct PhotoSwipeView: View {
     @AppStorage("isPremium") private var isPremium: Bool = false
     @AppStorage("totalSwipes") private var totalSwipes: Int = 0
     @AppStorage("hasSeenPaywall") private var hasSeenPaywall: Bool = false
+    @State private var swipeHistory: [String] = []
     
     var body: some View {
         ZStack {
@@ -47,9 +48,31 @@ struct PhotoSwipeView: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                         Spacer()
-                        Text("\(min(currentIndex+1, month.assets.count))/\(month.assets.count)")
-                            .foregroundColor(.white)
-                            .font(.custom("Poppins-Regular", size: 16))
+                        // Undo button and count
+                        HStack(spacing: 10) {
+                            Button(action: {
+                                if currentIndex > 0, let last = swipeHistory.popLast() {
+                                    currentIndex -= 1
+                                    if last == "keep" {
+                                        keepCount = max(keepCount - 1, 0)
+                                    } else if last == "delete" {
+                                        deleteCount = max(deleteCount - 1, 0)
+                                        if !assetsToDelete.isEmpty {
+                                            assetsToDelete.removeLast()
+                                        }
+                                    }
+                                }
+                            }) {
+                                Image(systemName: "arrow.uturn.left.circle.fill")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(currentIndex > 0 && !swipeHistory.isEmpty ? .white : .gray)
+                                    .opacity(currentIndex > 0 && !swipeHistory.isEmpty ? 1.0 : 0.5)
+                            }
+                            .disabled(currentIndex == 0 || swipeHistory.isEmpty)
+                            Text("\(min(currentIndex+1, month.assets.count))/\(month.assets.count)")
+                                .foregroundColor(.white)
+                                .font(.custom("Poppins-Regular", size: 16))
+                        }
                     }
                     .padding(.horizontal, 12)
                     .padding(.top, geo.safeAreaInsets.top + 8)
@@ -412,6 +435,7 @@ struct PhotoSwipeView: View {
             let assetToDelete = month.assets[currentIndex]
             assetsToDelete.append(assetToDelete)
             deleteCount += 1
+            swipeHistory.append("delete")
             incrementSwipeCountIfNeeded()
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
@@ -431,6 +455,7 @@ struct PhotoSwipeView: View {
         isAnimatingOff = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
             keepCount += 1
+            swipeHistory.append("keep")
             incrementSwipeCountIfNeeded()
             nextPhoto()
             offset = .zero
