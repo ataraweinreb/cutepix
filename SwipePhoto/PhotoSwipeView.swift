@@ -148,8 +148,7 @@ struct PhotoSwipeView: View {
                     }
                     Spacer(minLength: 0)
                     if !showDeleted {
-                        HStack(spacing: 32) {
-                            Spacer()
+                        HStack(spacing: 0) {
                             Button(action: {
                                 if !buttonActionInProgress && currentIndex < month.assets.count && canSwipe {
                                     deletePressed = true
@@ -157,27 +156,34 @@ struct PhotoSwipeView: View {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { deletePressed = false }
                                 }
                             }) {
-                                VStack(spacing: 6) {
+                                VStack(spacing: 4) {
                                     Text("DELETE")
-                                        .font(.custom("Poppins-SemiBold", size: 18))
+                                        .font(.system(size: 18, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.7)
+                                        .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
+                                        .textCase(.uppercase)
                                     Text("\(deleteCount)")
-                                        .font(.custom("Poppins-SemiBold", size: 28))
+                                        .font(.system(size: 28, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
+                                        .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
                                 }
-                                .frame(width: min(geo.size.width * 0.36, 140), height: min(geo.size.width * 0.36, 140))
+                                .frame(width: 104, height: 104)
                                 .background(
-                                    LinearGradient(gradient: Gradient(colors: [Color.purple, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                    LinearGradient(gradient: Gradient(colors: [Color.pink, Color.purple]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        .clipShape(Circle())
                                 )
-                                .clipShape(Circle())
-                                .shadow(color: Color.purple.opacity(0.3), radius: 8, x: 0, y: 3)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.22), lineWidth: 2)
+                                )
+                                .shadow(color: Color.pink.opacity(0.18), radius: 10, x: 0, y: 4)
                                 .scaleEffect(deletePressed ? 0.93 : 1.0)
                                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: deletePressed)
                             }
                             .disabled(buttonActionInProgress || currentIndex >= month.assets.count || !canSwipe)
+                            
                             Spacer()
+                            
                             Button(action: {
                                 if !buttonActionInProgress && currentIndex < month.assets.count && canSwipe {
                                     keepPressed = true
@@ -185,30 +191,34 @@ struct PhotoSwipeView: View {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { keepPressed = false }
                                 }
                             }) {
-                                VStack(spacing: 6) {
+                                VStack(spacing: 4) {
                                     Text("KEEP")
-                                        .font(.custom("Poppins-SemiBold", size: 18))
+                                        .font(.system(size: 18, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.7)
+                                        .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
+                                        .textCase(.uppercase)
                                     Text("\(keepCount)")
-                                        .font(.custom("Poppins-SemiBold", size: 28))
+                                        .font(.system(size: 28, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
+                                        .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
                                 }
-                                .frame(width: min(geo.size.width * 0.36, 140), height: min(geo.size.width * 0.36, 140))
+                                .frame(width: 104, height: 104)
                                 .background(
                                     LinearGradient(gradient: Gradient(colors: [Color.green, Color.teal]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        .clipShape(Circle())
                                 )
-                                .clipShape(Circle())
-                                .shadow(color: Color.green.opacity(0.3), radius: 8, x: 0, y: 3)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.22), lineWidth: 2)
+                                )
+                                .shadow(color: Color.green.opacity(0.18), radius: 10, x: 0, y: 4)
                                 .scaleEffect(keepPressed ? 0.93 : 1.0)
                                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: keepPressed)
                             }
                             .disabled(buttonActionInProgress || currentIndex >= month.assets.count || !canSwipe)
-                            Spacer()
                         }
                         .frame(minWidth: 0, maxWidth: .infinity)
-                        .padding(.horizontal, 0)
+                        .padding(.horizontal, 40)
                         .padding(.bottom, geo.safeAreaInsets.bottom + 18)
                     }
                 }
