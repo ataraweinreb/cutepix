@@ -1,11 +1,12 @@
 import Foundation
 import Photos
 
-struct PhotoMonth: Identifiable {
+struct PhotoMonth: Identifiable, Equatable {
     let id = UUID()
     let month: Int
     let year: Int
     let assets: [PHAsset]
+    var status: AlbumStatus
     
     var title: String {
         let dateFormatter = DateFormatter()
@@ -20,4 +21,14 @@ struct PhotoMonth: Identifiable {
     var statusKey: String {
         "albumStatus-\(month)-\(year)"
     }
+    
+    static func == (lhs: PhotoMonth, rhs: PhotoMonth) -> Bool {
+        lhs.id == rhs.id && lhs.month == rhs.month && lhs.year == rhs.year && lhs.assets == rhs.assets && lhs.status == rhs.status
+    }
+}
+
+enum AlbumStatus: String, Equatable, Codable {
+    case notStarted
+    case inProgress
+    case completed
 } 

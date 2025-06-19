@@ -316,6 +316,7 @@ struct PhotoSwipeView: View {
             loadProgress()
             if UserDefaults.standard.string(forKey: month.statusKey) != "completed" {
                 UserDefaults.standard.setValue("inProgress", forKey: month.statusKey)
+                photoManager.updateStatus(for: month.month, year: month.year, status: .inProgress)
             }
             if !isPremium && (totalSwipes >= 3 || hasSeenPaywall) {
                 showPaywall = true
@@ -352,6 +353,7 @@ struct PhotoSwipeView: View {
     func handleSessionEnd() {
         guard !isDeleting, !showDeleted else { return }
         UserDefaults.standard.setValue("completed", forKey: month.statusKey)
+        photoManager.updateStatus(for: month.month, year: month.year, status: .completed)
         clearProgress()
         if !assetsToDelete.isEmpty {
             // If there are photos to delete, delete them first
@@ -388,7 +390,8 @@ struct PhotoSwipeView: View {
                                 photoManager.photoMonths[monthIndex] = PhotoMonth(
                                     month: currentMonth.month,
                                     year: currentMonth.year,
-                                    assets: updatedAssets
+                                    assets: updatedAssets,
+                                    status: currentMonth.status
                                 )
                             }
                         }

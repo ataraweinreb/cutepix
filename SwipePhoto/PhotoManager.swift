@@ -47,9 +47,14 @@ class PhotoManager: ObservableObject {
             func appendCurrentMonthIfNeeded() {
                 if let key = currentMonthKey, !currentAssets.isEmpty {
                     let comps = key.split(separator: "-")
-                    let month = PhotoMonth(month: Int(comps[1])!, year: Int(comps[0])!, assets: currentAssets)
+                    let month = Int(comps[1])!
+                    let year = Int(comps[0])!
+                    let statusKey = "albumStatus-\(month)-\(year)"
+                    let statusString = UserDefaults.standard.string(forKey: statusKey) ?? "notStarted"
+                    let status = AlbumStatus(rawValue: statusString) ?? .notStarted
+                    let photoMonth = PhotoMonth(month: month, year: year, assets: currentAssets, status: status)
                     DispatchQueue.main.async {
-                        self.photoMonths.append(month)
+                        self.photoMonths.append(photoMonth)
                     }
                 }
             }
@@ -75,6 +80,13 @@ class PhotoManager: ObservableObject {
         DispatchQueue.main.async {
                 self.isLoading = false
             }
+        }
+    }
+
+    // Add this method to update status for a specific month
+    func updateStatus(for month: Int, year: Int, status: AlbumStatus) {
+        if let index = photoMonths.firstIndex(where: { $0.month == month && $0.year == year }) {
+            photoMonths[index].status = status
         }
     }
 } 

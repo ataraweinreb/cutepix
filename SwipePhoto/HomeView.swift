@@ -173,8 +173,7 @@ struct HomeView: View {
                                     ForEach(Array(menuItems.enumerated()), id: \ .element.id) { index, item in
                                         MenuCardView(item: item, recentsCount: item.month?.assets.count ?? 0, gradient: rainbowGradients[index % rainbowGradients.count]) {
                                             if let month = item.month, !month.assets.isEmpty {
-                                                let status = UserDefaults.standard.string(forKey: month.statusKey) ?? "notStarted"
-                                                if status == "completed" {
+                                                if month.status == .completed {
                                                     monthToReviewAgain = month
                                                     showReviewAgainTray = true
                                                 } else if isPremium || (totalSwipes < 3 && !hasSeenPaywall) {
@@ -187,7 +186,6 @@ struct HomeView: View {
                                     }
                                 }
                             }
-                            .id(refreshID)
                             .padding(.vertical, 24)
                             .padding(.horizontal, 14)
                         }
@@ -202,19 +200,26 @@ struct HomeView: View {
                                 lastOffset = value
                             }
                         }
-                        .sheet(item: $selectedMonth, onDismiss: { refreshID = UUID() }) { month in
+                        .sheet(item: $selectedMonth, onDismiss: {
+                            if let month = selectedMonth {
+                                let statusString = UserDefaults.standard.string(forKey: month.statusKey) ?? "notStarted"
+                                let status = AlbumStatus(rawValue: statusString) ?? .notStarted
+                                photoManager.updateStatus(for: month.month, year: month.year, status: status)
+                            }
+                        }) { month in
                             PhotoSwipeView(month: month, onBatchDelete: {
-                                // Removed redundant photoManager.fetchPhotos() call
+                                let statusString = UserDefaults.standard.string(forKey: month.statusKey) ?? "notStarted"
+                                let status = AlbumStatus(rawValue: statusString) ?? .notStarted
+                                photoManager.updateStatus(for: month.month, year: month.year, status: status)
                             }, photoManager: photoManager)
                         }
                         .confirmationDialog("This album is already done. Review again?", isPresented: $showReviewAgainTray, titleVisibility: .visible) {
                             Button("Review Again", role: .destructive) {
                                 if let month = monthToReviewAgain {
-                                    // Reset status and progress
                                     UserDefaults.standard.setValue("inProgress", forKey: month.statusKey)
                                     UserDefaults.standard.removeObject(forKey: "albumProgress-\(month.month)-\(month.year)")
+                                    photoManager.updateStatus(for: month.month, year: month.year, status: .inProgress)
                                     selectedMonth = month
-                                    refreshID = UUID()
                                 }
                             }
                             Button("Cancel", role: .cancel) {}
@@ -464,15 +469,6 @@ struct HomeView: View {
         var gradient: LinearGradient
         var action: () -> Void
         
-        func progressString(for month: PhotoMonth) -> String {
-            let progressKey = "albumProgress-\(month.month)-\(month.year)"
-            if let dict = UserDefaults.standard.dictionary(forKey: progressKey) as? [String: Int] {
-                let idx = (dict["currentIndex"] ?? 0) + 1 // 1-based for user
-                return "\(min(idx, month.assets.count))/\(month.assets.count)"
-            }
-            return "1/\(month.assets.count)"
-        }
-        
         var body: some View {
             GeometryReader { geo in
                 let size = min(geo.size.width, geo.size.height / 0.95)
@@ -503,8 +499,8 @@ struct HomeView: View {
                             }
                             // Progress or photo count badge
                             if let month = item.month {
-                                let status = UserDefaults.standard.string(forKey: month.statusKey) ?? "notStarted"
-                                if status == "inProgress" {
+                                switch month.status {
+                                case .inProgress:
                                     ProgressBadge(
                                         icon: "hourglass",
                                         color: Color(red: 1.0, green: 0.38, blue: 0.0),
@@ -513,7 +509,7 @@ struct HomeView: View {
                                     )
                                     .frame(height: size * 0.17)
                                     .padding(.top, size * 0.01)
-                                } else if status == "completed" {
+                                case .completed:
                                     ProgressBadge(
                                         icon: "checkmark",
                                         color: Color(red: 0.0, green: 0.78, blue: 0.32),
@@ -522,7 +518,7 @@ struct HomeView: View {
                                     )
                                     .frame(height: size * 0.17)
                                     .padding(.top, size * 0.01)
-                                } else {
+                                case .notStarted:
                                     Text("\(recentsCount) photos")
                                         .font(.custom("Poppins-Medium", size: size * 0.08))
                                         .foregroundColor(.white)
