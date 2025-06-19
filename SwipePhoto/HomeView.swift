@@ -183,10 +183,10 @@ struct HomeView: View {
                                                 }
                                             }
                                         }
-                                    }
                                 }
                             }
-                            .padding(.vertical, 24)
+                        }
+                        .padding(.vertical, 24)
                             .padding(.horizontal, 14)
                     }
                     .onPreferenceChange(ScrollOffsetKey.self) { value in
@@ -425,7 +425,7 @@ struct HomeView: View {
             if upper.contains("NOV") { return "🦃" }
             if upper.contains("DEC") { return "🎅" }
             return "📅"
-        }
+    }
 }
 
 struct MenuCardStyle {

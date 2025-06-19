@@ -76,49 +76,52 @@ struct PhotoSwipeView: View {
                             .foregroundColor(.white)
                             .padding()
                     } else if !showDeleted {
-                        ZStack {
-                            ForEach((currentIndex..<min(currentIndex+2, month.assets.count)).reversed(), id: \.self) { idx in
-                                PhotoCard(
-                                    asset: month.assets[idx],
-                                    offset: idx == currentIndex ? offset : .zero,
-                                    overlayText: idx == currentIndex ? overlayText : nil
-                                )
-                                .offset(x: idx == currentIndex ? offset.width : 0, y: CGFloat(idx - currentIndex) * 10)
-                                .rotationEffect(.degrees(idx == currentIndex ? Double(offset.width / 12) : 0))
-                                .scaleEffect(idx == currentIndex ? 1.0 : 0.96)
-                                .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.5), value: offset)
-                                .allowsHitTesting(idx == currentIndex && !buttonActionInProgress && canSwipe)
-                                .gesture(
-                                    idx == currentIndex && canSwipe ?
-                                    DragGesture()
-                                        .updating($dragState) { value, state, _ in
-                                            state = value.translation
-                                        }
-                                        .onChanged { gesture in
-                                            offset = gesture.translation
-                                        }
-                                        .onEnded { gesture in
-                                            let velocity = gesture.predictedEndTranslation.width - gesture.translation.width
-                                            let threshold: CGFloat = 100
-                                            let shouldKeep = offset.width > threshold || velocity > 200
-                                            let shouldDelete = offset.width < -threshold || velocity < -200
-                                            if shouldKeep {
-                                                animateKeep()
-                                            } else if shouldDelete {
-                                                animateDelete()
-                                            } else {
-                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                                    offset = .zero
-                                                }
+                        GeometryReader { geo in
+                            ZStack {
+                                ForEach((currentIndex..<min(currentIndex+2, month.assets.count)).reversed(), id: \ .self) { idx in
+                                    PhotoCard(
+                                        asset: month.assets[idx],
+                                        offset: idx == currentIndex ? offset : .zero,
+                                        overlayText: idx == currentIndex ? overlayText : nil
+                                    )
+                                    .offset(x: idx == currentIndex ? offset.width : 0, y: CGFloat(idx - currentIndex) * 10)
+                                    .rotationEffect(.degrees(idx == currentIndex ? Double(offset.width / 12) : 0))
+                                    .scaleEffect(idx == currentIndex ? 1.0 : 0.96)
+                                    .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.7, blendDuration: 0.5), value: offset)
+                                    .allowsHitTesting(idx == currentIndex && !buttonActionInProgress && canSwipe)
+                                    .frame(width: geo.size.width, height: geo.size.height)
+                                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                                }
+                            }
+                            .gesture(
+                                (currentIndex < month.assets.count && canSwipe) ?
+                                DragGesture()
+                                    .updating($dragState) { value, state, _ in
+                                        state = value.translation
+                                    }
+                                    .onChanged { gesture in
+                                        offset = gesture.translation
+                                    }
+                                    .onEnded { gesture in
+                                        let velocity = gesture.predictedEndTranslation.width - gesture.translation.width
+                                        let threshold: CGFloat = 100
+                                        let shouldKeep = offset.width > threshold || velocity > 200
+                                        let shouldDelete = offset.width < -threshold || velocity < -200
+                                        if shouldKeep {
+                                            animateKeep()
+                                        } else if shouldDelete {
+                                            animateDelete()
+                                        } else {
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                offset = .zero
                                             }
                                         }
-                                    : nil
-                                )
-                            }
+                                    }
+                                : nil
+                            )
                         }
-                        .frame(height: min(geo.size.height * 0.45, 340))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 24)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                     Spacer(minLength: 0)
                     if !showDeleted {
@@ -556,30 +559,34 @@ struct PhotoCard: View {
     @State private var image: UIImage? = nil
     
     var body: some View {
-        ZStack {
-            if let img = image {
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFit()
-                    .cornerRadius(20)
-                    .shadow(radius: 10)
-            } else {
-                Color.gray
-                    .cornerRadius(20)
+        GeometryReader { geo in
+            ZStack {
+                if let img = image {
+                    Image(uiImage: img)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .background(Color.black)
+                        .shadow(radius: 10)
+                } else {
+                    Color.gray
+                        .frame(width: geo.size.width, height: geo.size.height)
+                }
+                if let overlayText = overlayText {
+                    Text(overlayText)
+                        .font(.system(size: 48, weight: .bold))
+                        .foregroundColor(overlayText == "KEEP" ? .green : .red)
+                        .padding(16)
+                        .background(Color.white.opacity(0.8))
+                        .cornerRadius(16)
+                        .padding(32)
+                        .opacity(Double(min(abs(offset.width) / 120, 1)))
+                        .animation(.easeInOut, value: offset)
+                }
             }
-            if let overlayText = overlayText {
-                Text(overlayText)
-                    .font(.system(size: 48, weight: .bold))
-                    .foregroundColor(overlayText == "KEEP" ? .green : .purple)
-                    .padding(16)
-                    .background(Color.white.opacity(0.8))
-                    .cornerRadius(16)
-                    .padding(32)
-                    .opacity(Double(min(abs(offset.width) / 120, 1)))
-                    .animation(.easeInOut, value: offset)
-            }
+            .frame(width: geo.size.width, height: geo.size.height)
         }
-        .frame(maxWidth: .infinity, maxHeight: 500)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             fetchImage()
         }
