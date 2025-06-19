@@ -140,10 +140,6 @@ struct PhotoSwipeView: View {
                                     Text("\(deleteCount)")
                                         .font(.custom("Poppins-SemiBold", size: 28))
                                         .foregroundColor(.white)
-                                        .padding(.horizontal, 0)
-                                        .padding(.vertical, 0)
-                                        .background(Color.white.opacity(0.15))
-                                        .clipShape(Capsule())
                                 }
                                 .frame(width: min(geo.size.width * 0.36, 140), height: min(geo.size.width * 0.36, 140))
                                 .background(
@@ -172,10 +168,6 @@ struct PhotoSwipeView: View {
                                     Text("\(keepCount)")
                                         .font(.custom("Poppins-SemiBold", size: 28))
                                         .foregroundColor(.white)
-                                        .padding(.horizontal, 0)
-                                        .padding(.vertical, 0)
-                                        .background(Color.white.opacity(0.15))
-                                        .clipShape(Capsule())
                                 }
                                 .frame(width: min(geo.size.width * 0.36, 140), height: min(geo.size.width * 0.36, 140))
                                 .background(

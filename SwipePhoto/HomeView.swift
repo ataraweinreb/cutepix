@@ -65,7 +65,7 @@ struct HomeView: View {
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-                .ignoresSafeArea()
+                    .ignoresSafeArea()
                 VStack(spacing: 0) {
                     HStack(alignment: .center) {
                         Button(action: { showFAQ = true }) {
@@ -158,10 +158,10 @@ struct HomeView: View {
                     } else {
                         //                        Button("Show Paywall (Test)") { showPaywall = true }
                         //                            .padding(.bottom, 8)
-                        ScrollView {
-                            ScrollOffsetReader()
-                                .frame(height: 0)
-                            let columns: [GridItem] = [
+                    ScrollView {
+                        ScrollOffsetReader()
+                            .frame(height: 0)
+                        let columns: [GridItem] = [
                                 GridItem(.adaptive(minimum: UIScreen.main.bounds.width > 600 ? 220 : 160, maximum: UIScreen.main.bounds.width > 600 ? 260 : 200), spacing: 18)
                             ]
                             LazyVGrid(columns: columns, spacing: 28) {
@@ -172,12 +172,12 @@ struct HomeView: View {
                                 } else {
                                     ForEach(Array(menuItems.enumerated()), id: \ .element.id) { index, item in
                                         MenuCardView(item: item, recentsCount: item.month?.assets.count ?? 0, gradient: rainbowGradients[index % rainbowGradients.count]) {
-                                            if let month = item.month, !month.assets.isEmpty {
+                                    if let month = item.month, !month.assets.isEmpty {
                                                 if month.status == .completed {
                                                     monthToReviewAgain = month
                                                     showReviewAgainTray = true
                                                 } else if isPremium || (totalSwipes < 3 && !hasSeenPaywall) {
-                                                    selectedMonth = month
+                                        selectedMonth = month
                                                 } else {
                                                     showPaywall = true
                                                 }
@@ -188,18 +188,18 @@ struct HomeView: View {
                             }
                             .padding(.vertical, 24)
                             .padding(.horizontal, 14)
-                        }
-                        .onPreferenceChange(ScrollOffsetKey.self) { value in
-                            let delta = value - lastOffset
-                            if abs(delta) > 6 {
-                                if delta < 0 {
-                                    headerHidden = true
-                                } else if delta > 0 {
-                                    headerHidden = false
-                                }
-                                lastOffset = value
+                    }
+                    .onPreferenceChange(ScrollOffsetKey.self) { value in
+                        let delta = value - lastOffset
+                        if abs(delta) > 6 {
+                            if delta < 0 {
+                                headerHidden = true
+                            } else if delta > 0 {
+                                headerHidden = false
                             }
+                            lastOffset = value
                         }
+                    }
                         .sheet(item: $selectedMonth, onDismiss: {
                             if let month = selectedMonth {
                                 let statusString = UserDefaults.standard.string(forKey: month.statusKey) ?? "notStarted"
@@ -207,7 +207,7 @@ struct HomeView: View {
                                 photoManager.updateStatus(for: month.month, year: month.year, status: status)
                             }
                         }) { month in
-                            PhotoSwipeView(month: month, onBatchDelete: {
+                        PhotoSwipeView(month: month, onBatchDelete: {
                                 let statusString = UserDefaults.standard.string(forKey: month.statusKey) ?? "notStarted"
                                 let status = AlbumStatus(rawValue: statusString) ?? .notStarted
                                 photoManager.updateStatus(for: month.month, year: month.year, status: status)
@@ -238,151 +238,151 @@ struct HomeView: View {
                     totalSwipes = 0
                     hasSeenPaywall = false
                 })
-            }
-            .fullScreenCover(isPresented: $showOnboarding) {
-                OnboardingView {
-                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                    showOnboarding = false
-                }
+        }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView {
+                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                showOnboarding = false
             }
         }
-        
-        var menuItems: [MenuItem] {
-            photoManager.photoMonths.map { month in
-                let style = styleForMonth(title: month.title)
-                return MenuItem(
-                    id: month.id.uuidString,
-                    title: month.title.uppercased(),
-                    style: style,
-                    badge: false,
-                    month: month
-                )
-            }
+    }
+    
+    var menuItems: [MenuItem] {
+        photoManager.photoMonths.map { month in
+            let style = styleForMonth(title: month.title)
+            return MenuItem(
+                id: month.id.uuidString,
+                title: month.title.uppercased(),
+                style: style,
+                badge: false,
+                month: month
+            )
         }
-        
-        func styleForMonth(title: String) -> MenuCardStyle {
-            let baseFont = Font.system(size: 36, weight: .semibold, design: .serif)
-            let baseTextCase: Text.Case? = .none
-            let upper = title.uppercased()
-            if upper.contains("JAN") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.0, green: 0.36, blue: 0.92), // deep blue
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 0.36, blue: 0.92), Color(red: 0.0, green: 0.78, blue: 0.98)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "sparkles",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("FEB") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.95, green: 0.18, blue: 0.36), // punchy pink
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.0, blue: 0.4), Color(red: 1.0, green: 0.76, blue: 0.44)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "heart.fill",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("MAR") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.0, green: 0.7, blue: 0.3), // bold green
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 1.0, blue: 0.5), Color(red: 0.0, green: 0.8, blue: 0.4)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "leaf.fill",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("APR") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.0, green: 0.5, blue: 0.7), // teal blue
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 0.9, blue: 1.0), Color(red: 0.3, green: 0.5, blue: 1.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "cloud.rain.fill",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("MAY") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.95, green: 0.7, blue: 0.0), // gold
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.8, blue: 0.0), Color(red: 1.0, green: 0.5, blue: 0.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "flower",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("JUN") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.8, green: 0.0, blue: 0.8), // magenta
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.0, blue: 1.0), Color(red: 1.0, green: 0.7, blue: 0.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "sun.max.fill",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("JUL") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 1.0, green: 0.3, blue: 0.0), // orange red
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.2, blue: 0.0), Color(red: 1.0, green: 0.7, blue: 0.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "flame.fill",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("AUG") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.0, green: 0.7, blue: 0.5), // teal
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 1.0, blue: 0.7), Color(red: 0.0, green: 0.5, blue: 0.3)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "drop.fill",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("SEP") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.5, green: 0.2, blue: 0.8), // purple
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.5, green: 0.2, blue: 0.8), Color(red: 0.0, green: 0.8, blue: 0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "book.fill",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("OCT") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 1.0, green: 0.4, blue: 0.0), // orange
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.4, blue: 0.0), Color(red: 1.0, green: 0.0, blue: 0.4)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "moon.stars.fill",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("NOV") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.3, green: 0.3, blue: 0.3), // dark gray
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.3, green: 0.3, blue: 0.3), Color(red: 0.7, green: 0.7, blue: 0.7)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "wind",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            } else if upper.contains("DEC") {
-                return MenuCardStyle(
-                    font: baseFont,
-                    textColor: Color(red: 0.0, green: 0.2, blue: 1.0), // electric blue
-                    background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 0.2, blue: 1.0), Color(red: 0.0, green: 0.6, blue: 1.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
-                    icon: "snowflake",
-                    iconColor: Color.white.opacity(0.8),
-                    textCase: baseTextCase
-                )
-            }
-            // Default style for other months
+    }
+    
+    func styleForMonth(title: String) -> MenuCardStyle {
+        let baseFont = Font.system(size: 36, weight: .semibold, design: .serif)
+        let baseTextCase: Text.Case? = .none
+        let upper = title.uppercased()
+        if upper.contains("JAN") {
             return MenuCardStyle(
                 font: baseFont,
-                textColor: Color.black,
-                background: AnyView(Color.gray.opacity(0.2)),
-                icon: "star.fill",
-                iconColor: Color.black.opacity(0.7),
+                textColor: Color(red: 0.0, green: 0.36, blue: 0.92), // deep blue
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 0.36, blue: 0.92), Color(red: 0.0, green: 0.78, blue: 0.98)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "sparkles",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("FEB") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 0.95, green: 0.18, blue: 0.36), // punchy pink
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.0, blue: 0.4), Color(red: 1.0, green: 0.76, blue: 0.44)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "heart.fill",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("MAR") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 0.0, green: 0.7, blue: 0.3), // bold green
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 1.0, blue: 0.5), Color(red: 0.0, green: 0.8, blue: 0.4)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "leaf.fill",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("APR") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 0.0, green: 0.5, blue: 0.7), // teal blue
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 0.9, blue: 1.0), Color(red: 0.3, green: 0.5, blue: 1.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "cloud.rain.fill",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("MAY") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 0.95, green: 0.7, blue: 0.0), // gold
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.8, blue: 0.0), Color(red: 1.0, green: 0.5, blue: 0.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "flower",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("JUN") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 0.8, green: 0.0, blue: 0.8), // magenta
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.0, blue: 1.0), Color(red: 1.0, green: 0.7, blue: 0.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "sun.max.fill",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("JUL") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 1.0, green: 0.3, blue: 0.0), // orange red
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.2, blue: 0.0), Color(red: 1.0, green: 0.7, blue: 0.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "flame.fill",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("AUG") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 0.0, green: 0.7, blue: 0.5), // teal
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 1.0, blue: 0.7), Color(red: 0.0, green: 0.5, blue: 0.3)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "drop.fill",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("SEP") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 0.5, green: 0.2, blue: 0.8), // purple
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.5, green: 0.2, blue: 0.8), Color(red: 0.0, green: 0.8, blue: 0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "book.fill",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("OCT") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 1.0, green: 0.4, blue: 0.0), // orange
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.4, blue: 0.0), Color(red: 1.0, green: 0.0, blue: 0.4)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "moon.stars.fill",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("NOV") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 0.3, green: 0.3, blue: 0.3), // dark gray
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.3, green: 0.3, blue: 0.3), Color(red: 0.7, green: 0.7, blue: 0.7)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "wind",
+                iconColor: Color.white.opacity(0.8),
+                textCase: baseTextCase
+            )
+        } else if upper.contains("DEC") {
+            return MenuCardStyle(
+                font: baseFont,
+                textColor: Color(red: 0.0, green: 0.2, blue: 1.0), // electric blue
+                background: AnyView(LinearGradient(gradient: Gradient(colors: [Color(red: 0.0, green: 0.2, blue: 1.0), Color(red: 0.0, green: 0.6, blue: 1.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)),
+                icon: "snowflake",
+                iconColor: Color.white.opacity(0.8),
                 textCase: baseTextCase
             )
         }
+        // Default style for other months
+        return MenuCardStyle(
+            font: baseFont,
+            textColor: Color.black,
+            background: AnyView(Color.gray.opacity(0.2)),
+            icon: "star.fill",
+            iconColor: Color.black.opacity(0.7),
+            textCase: baseTextCase
+        )
+    }
         
         func gradientForMonth(_ title: String) -> LinearGradient {
             let upper = title.uppercased()
@@ -426,53 +426,53 @@ struct HomeView: View {
             if upper.contains("DEC") { return "🎅" }
             return "📅"
         }
+}
+
+struct MenuCardStyle {
+    let font: Font
+    let textColor: Color
+    let background: AnyView
+    let icon: String?
+    let iconColor: Color?
+    let textCase: Text.Case?
+}
+
+struct MenuItem: Identifiable {
+    let id: String
+    let title: String
+    let style: MenuCardStyle
+    var badge: Bool = false
+    var month: PhotoMonth? = nil
+    var imageBackground: String? = nil
+}
+
+struct ScrollOffsetKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
-    
-    struct MenuCardStyle {
-        let font: Font
-        let textColor: Color
-        let background: AnyView
-        let icon: String?
-        let iconColor: Color?
-        let textCase: Text.Case?
-    }
-    
-    struct MenuItem: Identifiable {
-        let id: String
-        let title: String
-        let style: MenuCardStyle
-        var badge: Bool = false
-        var month: PhotoMonth? = nil
-        var imageBackground: String? = nil
-    }
-    
-    struct ScrollOffsetKey: PreferenceKey {
-        static var defaultValue: CGFloat = 0
-        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-            value = nextValue()
+}
+
+struct ScrollOffsetReader: View {
+    var body: some View {
+        GeometryReader { geo in
+            Color.clear
+                .preference(key: ScrollOffsetKey.self, value: geo.frame(in: .global).minY)
         }
     }
+}
     
-    struct ScrollOffsetReader: View {
-        var body: some View {
-            GeometryReader { geo in
-                Color.clear
-                    .preference(key: ScrollOffsetKey.self, value: geo.frame(in: .global).minY)
-            }
-        }
-    }
-    
-    
-    struct MenuCardView: View {
-        let item: MenuItem
-        var recentsCount: Int = 0
+
+struct MenuCardView: View {
+    let item: MenuItem
+    var recentsCount: Int = 0
         var gradient: LinearGradient
-        var action: () -> Void
-        
-        var body: some View {
-            GeometryReader { geo in
+    var action: () -> Void
+    
+    var body: some View {
+        GeometryReader { geo in
                 let size = min(geo.size.width, geo.size.height / 0.95)
-                Button(action: action) {
+            Button(action: action) {
                     ZStack {
                         // Gradient background
                         gradient
@@ -482,8 +482,8 @@ struct HomeView: View {
                                 Text(emojiForMonth(item.title))
                                     .font(.system(size: size * 0.10, weight: .regular))
                                     .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
-                                    .minimumScaleFactor(0.5)
-                                    .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
                                 Text(capitalizeFirst(item.title))
                                     .font(.custom("Poppins-SemiBold", size: size * 0.16))
                                     .foregroundColor(.white)
@@ -519,11 +519,11 @@ struct HomeView: View {
                                     .frame(height: size * 0.17)
                                     .padding(.top, size * 0.01)
                                 case .notStarted:
-                                    Text("\(recentsCount) photos")
+                    Text("\(recentsCount) photos")
                                         .font(.custom("Poppins-Medium", size: size * 0.08))
                                         .foregroundColor(.white)
                                         .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
-                                        .lineLimit(1)
+                        .lineLimit(1)
                                         .minimumScaleFactor(0.7)
                                 }
                             } else {
@@ -531,7 +531,7 @@ struct HomeView: View {
                                     .font(.custom("Poppins-Medium", size: size * 0.08))
                                     .foregroundColor(.white)
                                     .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
-                                    .lineLimit(1)
+                            .lineLimit(1)
                                     .minimumScaleFactor(0.7)
                             }
                         }
@@ -595,105 +595,105 @@ struct HomeView: View {
                     .fill(color)
             )
             .shadow(color: color.opacity(0.18), radius: 4, x: 0, y: 2)
-        }
     }
-    
-    struct PolaroidStack: View {
-        let assets: [PHAsset]
-        let maxCount: Int
-        var thumbSize: CGFloat = 64
+}
+
+struct PolaroidStack: View {
+    let assets: [PHAsset]
+    let maxCount: Int
+    var thumbSize: CGFloat = 64
         var emoji: String? = nil
-        
-        var body: some View {
-            let indices = polaroidIndices(assetCount: assets.count, maxCount: maxCount)
-            ZStack {
-                ForEach(Array(indices.enumerated()), id: \ .element) { idx, assetIdx in
-                    PolaroidThumbnail(asset: assets[assetIdx], size: thumbSize)
-                        .rotationEffect(.degrees(Double(idx - 1) * 8))
-                        .offset(x: CGFloat(idx - 1) * thumbSize * 0.45)
-                        .zIndex(Double(idx))
-                }
+
+    var body: some View {
+        let indices = polaroidIndices(assetCount: assets.count, maxCount: maxCount)
+        ZStack {
+            ForEach(Array(indices.enumerated()), id: \ .element) { idx, assetIdx in
+                PolaroidThumbnail(asset: assets[assetIdx], size: thumbSize)
+                    .rotationEffect(.degrees(Double(idx - 1) * 8))
+                    .offset(x: CGFloat(idx - 1) * thumbSize * 0.45)
+                    .zIndex(Double(idx))
             }
-            .frame(width: CGFloat(maxCount) * thumbSize * 0.7 + thumbSize * 0.7, height: thumbSize * 1.45)
         }
-        
-        func polaroidIndices(assetCount: Int, maxCount: Int) -> [Int] {
-            guard assetCount > 0 else { return [] }
-            if assetCount == 1 { return [0] }
-            if assetCount == 2 { return [0, assetCount-1] }
-            if assetCount == 3 { return [0, assetCount/2, assetCount-1] }
-            // For more than 3, pick first, middle, last
-            let first = 0
-            let mid = assetCount / 2
-            let last = assetCount - 1
-            return [first, mid, last]
-        }
+        .frame(width: CGFloat(maxCount) * thumbSize * 0.7 + thumbSize * 0.7, height: thumbSize * 1.45)
     }
-    
-    struct PolaroidThumbnail: View {
-        let asset: PHAsset
-        var size: CGFloat = 64
-        @State private var image: UIImage? = nil
-        
-        var body: some View {
-            ZStack {
-                // Outer polaroid frame (1:1 aspect)
-                VStack(spacing: 0) {
-                    Spacer(minLength: 0)
-                    // Photo window (square, centered)
-                    ZStack {
-                        if let img = image {
-                            Image(uiImage: img)
-                                .resizable()
+
+    func polaroidIndices(assetCount: Int, maxCount: Int) -> [Int] {
+        guard assetCount > 0 else { return [] }
+        if assetCount == 1 { return [0] }
+        if assetCount == 2 { return [0, assetCount-1] }
+        if assetCount == 3 { return [0, assetCount/2, assetCount-1] }
+        // For more than 3, pick first, middle, last
+        let first = 0
+        let mid = assetCount / 2
+        let last = assetCount - 1
+        return [first, mid, last]
+    }
+}
+
+struct PolaroidThumbnail: View {
+    let asset: PHAsset
+    var size: CGFloat = 64
+    @State private var image: UIImage? = nil
+
+    var body: some View {
+        ZStack {
+            // Outer polaroid frame (1:1 aspect)
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                // Photo window (square, centered)
+                ZStack {
+                    if let img = image {
+                        Image(uiImage: img)
+                            .resizable()
                                 .scaledToFill()
-                                .frame(width: size * 0.82, height: size * 0.82)
-                                .clipped()
-                        } else {
-                            Color.gray
-                                .frame(width: size * 0.82, height: size * 0.82)
-                        }
+                            .frame(width: size * 0.82, height: size * 0.82)
+                            .clipped()
+                    } else {
+                        Color.gray
+                            .frame(width: size * 0.82, height: size * 0.82)
                     }
-                    .background(Color.white)
-                    // Even top/side borders, no corner radius on photo
-                    Spacer(minLength: 0)
                 }
-                .frame(width: size, height: size)
-                .background(
-                    ZStack {
-                        Color.white
-                        // Optional: subtle dot pattern overlay for texture
-                        // If you want a texture, you could use an overlay image here
-                    }
-                )
-                .overlay(
-                    // Thicker bottom border
-                    VStack(spacing: 0) {
-                        Spacer()
-                        Rectangle()
-                            .fill(Color.white)
-                            .frame(height: size * 0.22)
-                    }
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: size * 0.06)
-                        .stroke(Color.gray.opacity(0.18), lineWidth: size * 0.018)
-                )
-                .cornerRadius(size * 0.06)
-                .shadow(color: Color.black.opacity(0.18), radius: size * 0.13, y: size * 0.09)
+                .background(Color.white)
+                // Even top/side borders, no corner radius on photo
+                Spacer(minLength: 0)
             }
-            .aspectRatio(1, contentMode: .fit)
-            .onAppear {
-                let manager = PHImageManager.default()
-                let options = PHImageRequestOptions()
-                options.deliveryMode = .fastFormat
-                options.isSynchronous = false
-                options.resizeMode = .fast
-                manager.requestImage(for: asset, targetSize: CGSize(width: size, height: size), contentMode: .aspectFill, options: options) { img, _ in
-                    self.image = img
+            .frame(width: size, height: size)
+            .background(
+                ZStack {
+                    Color.white
+                    // Optional: subtle dot pattern overlay for texture
+                    // If you want a texture, you could use an overlay image here
                 }
+            )
+            .overlay(
+                // Thicker bottom border
+                VStack(spacing: 0) {
+                    Spacer()
+                    Rectangle()
+                        .fill(Color.white)
+                        .frame(height: size * 0.22)
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: size * 0.06)
+                    .stroke(Color.gray.opacity(0.18), lineWidth: size * 0.018)
+            )
+            .cornerRadius(size * 0.06)
+            .shadow(color: Color.black.opacity(0.18), radius: size * 0.13, y: size * 0.09)
+        }
+        .aspectRatio(1, contentMode: .fit)
+        .onAppear {
+            let manager = PHImageManager.default()
+            let options = PHImageRequestOptions()
+            options.deliveryMode = .fastFormat
+            options.isSynchronous = false
+            options.resizeMode = .fast
+            manager.requestImage(for: asset, targetSize: CGSize(width: size, height: size), contentMode: .aspectFill, options: options) { img, _ in
+                self.image = img
             }
         }
     }
+} 
     
     struct ShimmerAlbumCard: View {
         var gradient: LinearGradient
