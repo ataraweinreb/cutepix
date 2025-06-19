@@ -17,6 +17,7 @@ struct HomeView: View {
     @AppStorage("totalSwipes") private var totalSwipes: Int = 0
     @AppStorage("hasSeenPaywall") private var hasSeenPaywall: Bool = false
     @State private var showFAQ = false
+    @State private var refreshID = UUID()
     
     let rainbowGradients: [LinearGradient] = [
         // 1. Hot pink → peach
@@ -180,6 +181,7 @@ struct HomeView: View {
                                 }
                             }
                         }
+                        .id(refreshID)
                         .padding(.vertical, 24)
                         .padding(.horizontal, 14)
                     }
@@ -194,13 +196,16 @@ struct HomeView: View {
                             lastOffset = value
                         }
                     }
-                    .sheet(item: $selectedMonth) { month in
+                    .sheet(item: $selectedMonth, onDismiss: { refreshID = UUID() }) { month in
                         PhotoSwipeView(month: month, onBatchDelete: {
                                 // Removed redundant photoManager.fetchPhotos() call
                             }, photoManager: photoManager)
                         }
                     }
                 }
+            }
+            .onAppear {
+                photoManager.objectWillChange.send()
             }
         }
         .sheet(isPresented: $showPaywall) {
@@ -434,8 +439,6 @@ struct ScrollOffsetReader: View {
     }
 }
 
-import SwiftUI
-import Photos
 
 struct MenuCardView: View {
     let item: MenuItem
