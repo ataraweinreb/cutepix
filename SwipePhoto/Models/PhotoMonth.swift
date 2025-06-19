@@ -16,4 +16,8 @@ struct PhotoMonth: Identifiable {
         }
         return "\(month)/\(year)"
     }
+
+    var statusKey: String {
+        "albumStatus-\(month)-\(year)"
+    }
 } 

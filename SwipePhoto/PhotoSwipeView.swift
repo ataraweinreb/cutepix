@@ -313,6 +313,10 @@ struct PhotoSwipeView: View {
             })
         }
         .onAppear {
+            loadProgress()
+            if UserDefaults.standard.string(forKey: month.statusKey) != "completed" {
+                UserDefaults.standard.setValue("inProgress", forKey: month.statusKey)
+            }
             if !isPremium && (totalSwipes >= 3 || hasSeenPaywall) {
                 showPaywall = true
             }
@@ -347,7 +351,8 @@ struct PhotoSwipeView: View {
     
     func handleSessionEnd() {
         guard !isDeleting, !showDeleted else { return }
-        
+        UserDefaults.standard.setValue("completed", forKey: month.statusKey)
+        clearProgress()
         if !assetsToDelete.isEmpty {
             // If there are photos to delete, delete them first
             isDeleting = true
@@ -416,6 +421,7 @@ struct PhotoSwipeView: View {
             offset = .zero
             isAnimatingOff = false
             buttonActionInProgress = false
+            saveProgress()
         }
     }
     func animateKeep() {
@@ -432,6 +438,7 @@ struct PhotoSwipeView: View {
             offset = .zero
             isAnimatingOff = false
             buttonActionInProgress = false
+            saveProgress()
         }
     }
     func incrementSwipeCountIfNeeded() {
@@ -442,6 +449,29 @@ struct PhotoSwipeView: View {
                 showPaywall = true
             }
         }
+    }
+
+    func progressKey() -> String { "albumProgress-\(month.month)-\(month.year)" }
+
+    func saveProgress() {
+        let dict: [String: Int] = [
+            "currentIndex": currentIndex,
+            "keepCount": keepCount,
+            "deleteCount": deleteCount
+        ]
+        UserDefaults.standard.setValue(dict, forKey: progressKey())
+    }
+
+    func loadProgress() {
+        if let dict = UserDefaults.standard.dictionary(forKey: progressKey()) as? [String: Int] {
+            currentIndex = dict["currentIndex"] ?? 0
+            keepCount = dict["keepCount"] ?? 0
+            deleteCount = dict["deleteCount"] ?? 0
+        }
+    }
+
+    func clearProgress() {
+        UserDefaults.standard.removeObject(forKey: progressKey())
     }
 }
 

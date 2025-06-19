@@ -443,6 +443,15 @@ struct MenuCardView: View {
     var gradient: LinearGradient
     var action: () -> Void
     
+    func progressString(for month: PhotoMonth) -> String {
+        let progressKey = "albumProgress-\(month.month)-\(month.year)"
+        if let dict = UserDefaults.standard.dictionary(forKey: progressKey) as? [String: Int] {
+            let idx = (dict["currentIndex"] ?? 0) + 1 // 1-based for user
+            return "\(min(idx, month.assets.count))/\(month.assets.count)"
+        }
+        return "1/\(month.assets.count)"
+    }
+    
     var body: some View {
         GeometryReader { geo in
             let size = min(geo.size.width, geo.size.height / 0.95)
@@ -459,7 +468,7 @@ struct MenuCardView: View {
                                 .minimumScaleFactor(0.5)
                                 .lineLimit(1)
                             Text(capitalizeFirst(item.title))
-                                .font(.custom("Poppins-SemiBold", size: size * 0.12))
+                                .font(.custom("Poppins-SemiBold", size: size * 0.16))
                                 .foregroundColor(.white)
                                 .shadow(color: .black.opacity(0.7), radius: 3, x: 0, y: 1)
                                 .lineLimit(1)
@@ -471,13 +480,43 @@ struct MenuCardView: View {
                                 .padding(.top, size * 0.01)
                                 .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 4)
                         }
-                        // Photo count
-                        Text("\(recentsCount) photos")
-                            .font(.custom("Poppins-Medium", size: size * 0.08))
-                            .foregroundColor(.white)
-                            .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                        // Progress or photo count badge
+                        if let month = item.month {
+                            let status = UserDefaults.standard.string(forKey: month.statusKey) ?? "notStarted"
+                            if status == "inProgress" {
+                                ProgressBadge(
+                                    icon: "hourglass",
+                                    color: Color(red: 1.0, green: 0.38, blue: 0.0),
+                                    text: "In Prog",
+                                    fontSize: size * 0.09
+                                )
+                                .frame(height: size * 0.17)
+                                .padding(.top, size * 0.01)
+                            } else if status == "completed" {
+                                ProgressBadge(
+                                    icon: "checkmark",
+                                    color: Color(red: 0.0, green: 0.78, blue: 0.32),
+                                    text: "Done",
+                                    fontSize: size * 0.09
+                                )
+                                .frame(height: size * 0.17)
+                                .padding(.top, size * 0.01)
+                            } else {
+                                Text("\(recentsCount) photos")
+                                    .font(.custom("Poppins-Medium", size: size * 0.08))
+                                    .foregroundColor(.white)
+                                    .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.7)
+                            }
+                        } else {
+                            Text("\(recentsCount) photos")
+                                .font(.custom("Poppins-Medium", size: size * 0.08))
+                                .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
                     }
                     .padding(.vertical, size * 0.06)
                     .padding(.horizontal, size * 0.06)
@@ -513,6 +552,32 @@ struct MenuCardView: View {
     func capitalizeFirst(_ str: String) -> String {
         guard let first = str.first else { return str }
         return first.uppercased() + str.dropFirst().lowercased()
+    }
+}
+
+struct ProgressBadge: View {
+    let icon: String
+    let color: Color
+    let text: String
+    let fontSize: CGFloat
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: fontSize * 1.2, height: fontSize * 1.2)
+                .foregroundColor(.white)
+            Text(text)
+                .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 18)
+        .background(
+            Capsule()
+                .fill(color)
+        )
+        .shadow(color: color.opacity(0.18), radius: 4, x: 0, y: 2)
     }
 }
 
