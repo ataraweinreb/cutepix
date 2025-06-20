@@ -547,7 +547,7 @@ struct MenuCardView: View {
                     .frame(width: geo.size.width, height: geo.size.width * 0.95)
                     .background(Color.clear)
                     .cornerRadius(36)
-                    .shadow(color: Color.black.opacity(0.18), radius: 22, x: 0, y: 10)
+                    .shadow(color: Color.black.opacity(0.25), radius: 28, x: 0, y: 12)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
