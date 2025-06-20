@@ -480,12 +480,12 @@ struct MenuCardView: View {
                             // Emoji and month name in a row
                             HStack(spacing: size * 0.04) {
                                 Text(emojiForMonth(item.title))
-                                    .font(.system(size: size * 0.10, weight: .regular))
+                                    .font(.system(size: size * 0.12, weight: .regular))
                                     .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
                                 Text(capitalizeFirst(item.title))
-                                    .font(.custom("Poppins-SemiBold", size: size * 0.16))
+                                    .font(.custom("Poppins-SemiBold", size: size * 0.14))
                                     .foregroundColor(.white)
                                     .shadow(color: .black.opacity(0.7), radius: 3, x: 0, y: 1)
                                     .lineLimit(1)
@@ -504,7 +504,7 @@ struct MenuCardView: View {
                                     ProgressBadge(
                                         icon: "hourglass",
                                         color: Color(red: 1.0, green: 0.38, blue: 0.0),
-                                        text: "In Prog",
+                                        text: "Started",
                                         fontSize: size * 0.09
                                     )
                                     .frame(height: size * 0.17)
@@ -520,19 +520,17 @@ struct MenuCardView: View {
                                     .padding(.top, size * 0.01)
                                 case .notStarted:
                     Text("\(recentsCount) photos")
-                                        .font(.custom("Poppins-Medium", size: size * 0.08))
+                                        .font(.custom("Poppins-Medium", size: size * 0.10))
                                         .foregroundColor(.white)
                                         .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
                         .lineLimit(1)
-                                        .minimumScaleFactor(0.7)
                                 }
                             } else {
                                 Text("\(recentsCount) photos")
-                                    .font(.custom("Poppins-Medium", size: size * 0.08))
+                                    .font(.custom("Poppins-Medium", size: size * 0.10))
                                     .foregroundColor(.white)
                                     .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
                             .lineLimit(1)
-                                    .minimumScaleFactor(0.7)
                             }
                         }
                         .padding(.vertical, size * 0.06)
