@@ -1,5 +1,6 @@
 import Foundation
 import Photos
+import SDWebImage
 
 class PhotoManager: ObservableObject {
     @Published var photoMonths: [PhotoMonth] = []
@@ -174,23 +175,53 @@ class PhotoManager: ObservableObject {
         }
     }
     
-    // Preload FAQ GIFs in the background
+    // Preload FAQ GIFs using SDWebImage for proper caching
     private func preloadFAQGifs() {
-        DispatchQueue.global(qos: .utility).async {
-            for urlString in self.faqGifUrls {
-                guard let url = URL(string: urlString) else { continue }
+        print("🔄 Starting FAQ GIF preload...")
+        
+        // Configure the shared SDWebImage cache for long-term storage
+        let sharedCache = SDImageCache.shared
+        sharedCache.config.maxDiskAge = 365 * 24 * 60 * 60 // 1 year
+        
+        // Convert URLs to URL objects for SDWebImage
+        let urls = faqGifUrls.compactMap { URL(string: $0) }
+        
+        // Preload images using SDWebImage's caching system
+        SDWebImagePrefetcher.shared.prefetchURLs(
+            urls,
+            progress: { finishedCount, totalCount in
+                print("🔄 FAQ GIF preload progress: \(finishedCount)/\(totalCount)")
+            },
+            completed: { finishedCount, skippedCount in
+                print("✅ FAQ GIF preload complete: \(finishedCount) loaded, \(skippedCount) skipped")
                 
-                // Use URLSession to preload the GIF data
-                let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                    if let data = data, error == nil {
-                        // Successfully loaded the GIF data
-                        // SDWebImage will cache this automatically when it's first displayed
-                        print("Preloaded FAQ GIF: \(urlString)")
-                    } else {
-                        print("Failed to preload FAQ GIF: \(urlString), error: \(error?.localizedDescription ?? "unknown")")
-                    }
+                // Verify cache status
+                self.verifyFAQCache()
+            }
+        )
+    }
+    
+    // Verify that FAQ GIFs are properly cached
+    private func verifyFAQCache() {
+        let urls = faqGifUrls.compactMap { URL(string: $0) }
+        var cachedCount = 0
+        
+        let cache = SDImageCache.shared
+        
+        for url in urls {
+            // Check cache asynchronously to avoid blocking the main thread
+            cache.diskImageExists(withKey: url.absoluteString) { exists in
+                if exists {
+                    cachedCount += 1
+                    print("✅ FAQ GIF cached: \(url.lastPathComponent)")
+                } else {
+                    print("❌ FAQ GIF not cached: \(url.lastPathComponent)")
                 }
-                task.resume()
+                
+                // Print summary when all checks are done
+                if url == urls.last {
+                    print("📊 FAQ Cache Summary: \(cachedCount)/\(urls.count) GIFs cached")
+                }
             }
         }
     }

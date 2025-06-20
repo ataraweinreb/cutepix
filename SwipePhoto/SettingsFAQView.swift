@@ -225,7 +225,7 @@ struct FAQPolaroidCard: View {
     var body: some View {
         VStack(spacing: 0) {
             if let memeUrl = card.memeUrl {
-                WebImage(url: URL(string: memeUrl))
+                AnimatedImage(url: URL(string: memeUrl))
                     .resizable()
                     .indicator(.activity)
                     .scaledToFit()
