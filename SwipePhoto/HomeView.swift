@@ -158,7 +158,7 @@ struct HomeView: View {
     }
     
     func styleForMonth(title: String) -> MenuCardStyle {
-        let baseFont = Font.system(size: 36, weight: .semibold, design: .serif)
+        let baseFont = Font.system(size: 36, weight: .regular, design: .serif)
         let baseTextCase: Text.Case? = .none
         let upper = title.uppercased()
         if upper.contains("JAN") {
@@ -345,7 +345,7 @@ struct Header: View {
                 
                 Spacer()
                 Text("Swipe Photo")
-                    .font(.system(size: 30, weight: .semibold))
+                    .font(.system(size: 30, weight: .bold))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.18), radius: 3, x: 0, y: 2)
                 Spacer()
@@ -488,7 +488,7 @@ struct MenuCardView: View {
                             // Emoji and month name in a row
                             HStack(spacing: size * 0.04) {
                                 Text(emojiForMonth(item.title))
-                                    .font(.system(size: size * 0.12, weight: .regular))
+                                    .font(.system(size: size * 0.12, weight: .bold))
                                     .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)

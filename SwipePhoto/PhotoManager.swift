@@ -109,6 +109,9 @@ class PhotoManager: ObservableObject {
     func updateStatus(for month: Int, year: Int, status: AlbumStatus) {
         if let index = photoMonths.firstIndex(where: { $0.month == month && $0.year == year }) {
             photoMonths[index].status = status
+            // Save to UserDefaults
+            let statusKey = "albumStatus-\(month)-\(year)"
+            UserDefaults.standard.setValue(status.rawValue, forKey: statusKey)
         }
     }
     
