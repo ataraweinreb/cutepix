@@ -507,6 +507,9 @@ struct MenuCardView: View {
                             }
                             // Progress or photo count badge
                             if let month = item.month {
+                                // Debug: Print status for debugging
+                              
+                                
                                 switch month.status {
                                 case .inProgress:
                                     ProgressBadge(

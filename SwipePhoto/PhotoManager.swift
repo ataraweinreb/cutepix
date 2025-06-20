@@ -90,6 +90,10 @@ class PhotoManager: ObservableObject {
                 let statusKey = "albumStatus-\(month)-\(year)"
                 let statusString = UserDefaults.standard.string(forKey: statusKey) ?? "notStarted"
                 let status = AlbumStatus(rawValue: statusString) ?? .notStarted
+                
+                // Debug: Print status for each month
+                print("Month \(month)/\(year): status = \(statusString) -> \(status)")
+                
                 let photoMonth = PhotoMonth(month: month, year: year, assets: assetsForMonth, status: status)
                 
                 // Send the new month to the UI
