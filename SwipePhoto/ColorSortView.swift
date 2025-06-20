@@ -49,18 +49,18 @@ struct PhotoThumbnail: View {
         isLoading = true
         loadError = false
         
-        let manager = PHImageManager.default()
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .fastFormat
-        options.isSynchronous = false
-        options.resizeMode = .fast
+            let manager = PHImageManager.default()
+            let options = PHImageRequestOptions()
+            options.deliveryMode = .fastFormat
+            options.isSynchronous = false
+            options.resizeMode = .fast
         options.isNetworkAccessAllowed = true
         
         manager.requestImage(for: asset, targetSize: CGSize(width: 120, height: 120), contentMode: .aspectFill, options: options) { img, info in
             DispatchQueue.main.async {
                 self.isLoading = false
                 if let img = img {
-                    self.image = img
+                self.image = img
                 } else {
                     self.loadError = true
                     print("Failed to load thumbnail for asset: \(asset.localIdentifier)")

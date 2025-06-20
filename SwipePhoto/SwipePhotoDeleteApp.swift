@@ -15,7 +15,7 @@ struct SwipePhotoDeleteApp: App {
     
     var body: some Scene {
         WindowGroup {
-            HomeView(photoManager: photoManager)
+            HomeView()
                 .environmentObject(photoManager)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
                     photoManager.fetchPhotos()

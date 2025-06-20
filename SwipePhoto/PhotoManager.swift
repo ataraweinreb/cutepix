@@ -34,49 +34,58 @@ class PhotoManager: ObservableObject {
     }
     
     func fetchPhotos() {
-        isLoading = true
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
+        // Set loading state and clear existing data on the main thread
+        DispatchQueue.main.async {
+            self.isLoading = true
+            self.photoMonths = []
+        }
+        
+        DispatchQueue.global(qos: .userInitiated).async {
         let fetchOptions = PHFetchOptions()
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         let assets = PHAsset.fetchAssets(with: .image, options: fetchOptions)
 
-            var currentMonthKey: String? = nil
-            var currentAssets: [PHAsset] = []
-
-            func appendCurrentMonthIfNeeded() {
-                if let key = currentMonthKey, !currentAssets.isEmpty {
-                    let comps = key.split(separator: "-")
-                    let month = Int(comps[1])!
-                    let year = Int(comps[0])!
-                    let statusKey = "albumStatus-\(month)-\(year)"
-                    let statusString = UserDefaults.standard.string(forKey: statusKey) ?? "notStarted"
-                    let status = AlbumStatus(rawValue: statusString) ?? .notStarted
-                    let photoMonth = PhotoMonth(month: month, year: year, assets: currentAssets, status: status)
+            guard assets.count > 0 else {
                     DispatchQueue.main.async {
-                        self.photoMonths.append(photoMonth)
-                    }
+                    self.isLoading = false
+                }
+                return
+            }
+            
+            // Group assets by month efficiently in the background
+            var months: [DateComponents: [PHAsset]] = [:]
+            let calendar = Calendar.current
+            assets.enumerateObjects { (asset, _, _) in
+                let components = calendar.dateComponents([.year, .month], from: asset.creationDate ?? Date())
+                if months[components] != nil {
+                    months[components]?.append(asset)
+                } else {
+                    months[components] = [asset]
                 }
             }
-
-            DispatchQueue.main.async {
-                self.photoMonths = []
+            
+            let sortedMonthKeys = months.keys.sorted {
+                if $0.year != $1.year { return $0.year ?? 0 > $1.year ?? 0 }
+                return $0.month ?? 0 > $1.month ?? 0
             }
-        
-        assets.enumerateObjects { asset, _, _ in
-                guard let asset = asset as? PHAsset else { return }
-                guard let date = asset.creationDate else { return }
-                let comps = Calendar.current.dateComponents([.year, .month], from: date)
-                let key = "\(comps.year!)-\(comps.month!)"
-                if key != currentMonthKey {
-                    appendCurrentMonthIfNeeded()
-                    currentMonthKey = key
-                    currentAssets = []
+            
+            // Process and publish each month individually
+            for key in sortedMonthKeys {
+                let assetsForMonth = months[key] ?? []
+                let month = key.month ?? 1
+                let year = key.year ?? 1970
+                let statusKey = "albumStatus-\(month)-\(year)"
+                let statusString = UserDefaults.standard.string(forKey: statusKey) ?? "notStarted"
+                let status = AlbumStatus(rawValue: statusString) ?? .notStarted
+                let photoMonth = PhotoMonth(month: month, year: year, assets: assetsForMonth, status: status)
+                
+                // Send the new month to the UI
+                DispatchQueue.main.async {
+                    self.photoMonths.append(photoMonth)
                 }
-                currentAssets.append(asset)
             }
-            // Append the last month
-            appendCurrentMonthIfNeeded()
+            
+            // Signal that loading is complete
         DispatchQueue.main.async {
                 self.isLoading = false
             }

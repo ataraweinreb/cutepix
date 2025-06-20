@@ -29,7 +29,7 @@ struct OnboardingView: View {
                         .minimumScaleFactor(0.7)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 12)
-                    Text("The playful, girly way to clean your camera roll 💖")
+                    Text("The fast and playful way to clean your camera roll 🎉")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white.opacity(0.95))
                         .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
@@ -144,15 +144,13 @@ struct OnboardingPolaroidStack: View {
     let onFinish: () -> Void
     @State private var currentIndex = 0
     @State private var dragOffset: CGSize = .zero
-    let gifUrls = [
-        "https://media.giphy.com/media/3o7aTvhUAeRLAVx8vm/giphy.gif",
-        "https://media.giphy.com/media/TydZAW0DVCbGE/giphy.gif",
-        "https://media.giphy.com/media/ydttw7Bg2tHVHecInE/giphy.gif"
+    let imageNames = [
+        "Party",
+        "Storage",
     ]
     let captions = [
-        "Swipe to clean! ✨",
-        "Keep your faves 💖",
-        "Delete the rest 🧼"
+        "Swipe to ✅ or 🗑️!",
+        "Free up storage!"
     ]
     var body: some View {
         VStack(spacing: 2) {
@@ -170,12 +168,12 @@ struct OnboardingPolaroidStack: View {
             .padding(.bottom, 2)
             ZStack {
                 // Polaroid cards
-                ForEach(currentIndex..<gifUrls.count, id: \.self) { i in
-                    PolaroidCard(gifUrl: gifUrls[i], caption: captions[i])
+                ForEach(currentIndex..<imageNames.count, id: \.self) { i in
+                    PolaroidCard(imageName: imageNames[i], caption: captions[i])
                         .offset(x: i == currentIndex ? dragOffset.width : CGFloat(i - currentIndex) * 8,
                                 y: i == currentIndex ? dragOffset.height : CGFloat(i - currentIndex) * 8)
                         .rotationEffect(i == currentIndex ? .degrees(Double(dragOffset.width / 12)) : .degrees(0))
-                        .zIndex(Double(gifUrls.count - i))
+                        .zIndex(Double(imageNames.count - i))
                         .gesture(
                             DragGesture(minimumDistance: 10)
                                 .onChanged { value in
@@ -192,7 +190,7 @@ struct OnboardingPolaroidStack: View {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                                                 withAnimation(.spring()) {
                                                     dragOffset = .zero
-                                                    if currentIndex < gifUrls.count - 1 {
+                                                    if currentIndex < imageNames.count - 1 {
                                                         currentIndex += 1
                                                     } else {
                                                         onFinish()
@@ -217,13 +215,12 @@ struct OnboardingPolaroidStack: View {
 
 // Helper for a single polaroid card
 struct PolaroidCard: View {
-    let gifUrl: String
+    let imageName: String
     let caption: String
     var body: some View {
         VStack(spacing: 0) {
-            WebImage(url: URL(string: gifUrl))
+            Image(imageName)
                 .resizable()
-                .indicator(.activity)
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 180, height: 110)
                 .clipped()

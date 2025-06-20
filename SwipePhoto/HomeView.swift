@@ -6,50 +6,38 @@ import SDWebImageSwiftUI
 import SwiftUI
 
 struct HomeView: View {
-    @ObservedObject var photoManager: PhotoManager
-    @State private var selectedMonth: PhotoMonth?
+    @EnvironmentObject var photoManager: PhotoManager
+    @State private var selectedMonth: PhotoMonth? = nil
     @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
     @State private var showSettings = false
-    @State private var headerHidden: Bool = false
-    @State private var lastOffset: CGFloat = 0
-    @State private var showPaywall = false
-    @AppStorage("isPremium") private var isPremium: Bool = false
-    @AppStorage("totalSwipes") private var totalSwipes: Int = 0
-    @AppStorage("hasSeenPaywall") private var hasSeenPaywall: Bool = false
     @State private var showFAQ = false
-    @State private var refreshID = UUID()
     @State private var showReviewAgainTray = false
     @State private var monthToReviewAgain: PhotoMonth? = nil
+    @State private var isReadyToReviewMonth = false
+    @State private var isPremium: Bool = UserDefaults.standard.bool(forKey: "isPremium")
+    @State private var totalSwipes: Int = UserDefaults.standard.integer(forKey: "totalSwipes")
+    @State private var hasSeenPaywall: Bool = UserDefaults.standard.bool(forKey: "hasSeenPaywall")
+    @State private var showPaywall = false
+    @State private var headerHidden = false
+    @State private var lastOffset: CGFloat = 0
+    @State private var refreshID = UUID()
     
     let rainbowGradients: [LinearGradient] = [
-        // 1. Hot pink → peach
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.95, green: 0.2, blue: 0.7), Color(red: 1.0, green: 0.5, blue: 0.4)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 2. Rich purple → blue
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.6, green: 0.3, blue: 0.9), Color(red: 0.4, green: 0.5, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 3. Vibrant aqua → sky blue
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.3, green: 0.9, blue: 0.9), Color(red: 0.4, green: 0.6, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 4. Deep pink → lavender
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.9, green: 0.3, blue: 0.8), Color(red: 0.7, green: 0.5, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 5. Coral → golden
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.95, green: 0.5, blue: 0.4), Color(red: 0.95, green: 0.8, blue: 0.4)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 6. Emerald → teal
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.4, green: 0.9, blue: 0.7), Color(red: 0.2, green: 0.7, blue: 0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 7. Sunset orange → pink
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.95, green: 0.5, blue: 0.4), Color(red: 0.9, green: 0.3, blue: 0.8)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 8. Royal blue → purple
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.3, green: 0.5, blue: 0.9), Color(red: 0.6, green: 0.3, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 9. Deep fuchsia → magenta
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.9, green: 0.2, blue: 0.5), Color(red: 0.8, green: 0.2, blue: 0.5)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 10. Golden → mint
-        LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.9, blue: 0.4), Color(red: 0.4, green: 0.9, blue: 0.7)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 11. Deep coral → pink
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.95, green: 0.5, blue: 0.4), Color(red: 0.95, green: 0.2, blue: 0.7)]), startPoint: .topLeading, endPoint: .bottomTrailing),
-        // 12. Deep blue → aqua
-        LinearGradient(gradient: Gradient(colors: [Color(red: 0.3, green: 0.5, blue: 0.9), Color(red: 0.3, green: 0.9, blue: 0.9)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        LinearGradient(gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color(red:1.0, green:0.5, blue:0.0)]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        LinearGradient(gradient: Gradient(colors: [Color.green, Color.teal]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        LinearGradient(gradient: Gradient(colors: [Color.pink, Color.purple]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        LinearGradient(gradient: Gradient(colors: [Color.orange, Color.red]), startPoint: .topLeading, endPoint: .bottomTrailing),
+        LinearGradient(gradient: Gradient(colors: [Color.yellow, Color.orange]), startPoint: .topLeading, endPoint: .bottomTrailing)
     ]
     
     var body: some View {
-        NavigationView {
+        GeometryReader { geo in
+            let safeArea = geo.safeAreaInsets
+            let columns: [GridItem] = [
+                GridItem(.adaptive(minimum: UIScreen.main.bounds.width > 600 ? 220 : 160, maximum: UIScreen.main.bounds.width > 600 ? 260 : 200), spacing: 18)
+            ]
+
             ZStack {
                 Color.black.ignoresSafeArea()
                 LinearGradient(
@@ -67,179 +55,59 @@ struct HomeView: View {
                 )
                     .ignoresSafeArea()
                 VStack(spacing: 0) {
-                    HStack(alignment: .center) {
-                        Button(action: { showFAQ = true }) {
-                            Image(systemName: "questionmark.circle")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 44, height: 44)
-                                .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
-                                .clipShape(Circle())
-                                .shadow(radius: 2, y: 1)
-                        }
-                        .padding(.leading, 14)
-                        .sheet(isPresented: $showFAQ) {
-                            SettingsFAQView()
-                        }
-                        Spacer()
-                        Text("Swipe Photo")
-                            .font(.system(size: 30, weight: .semibold))
-                            .foregroundColor(.white)
-                            .shadow(color: .black.opacity(0.18), radius: 3, x: 0, y: 2)
-                        Spacer()
-                        Button(action: { showSettings = true }) {
-                            Image(systemName: "gearshape")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 44, height: 44)
-                                .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
-                                .clipShape(Circle())
-                                .shadow(radius: 2, y: 1)
-                        }
-                        .padding(.trailing, 14)
-                        .sheet(isPresented: $showSettings) {
-                            SettingsMainView()
-                        }
-                    }
-                    .frame(height: 80)
-                    .padding(.horizontal, 14)
-                    Divider()
-                        .frame(height: 1)
-                        .background(Color.white.opacity(0.09))
-                    if photoManager.authorizationStatus == .denied || photoManager.authorizationStatus == .restricted {
-                        ZStack {
-                            Color.clear // for layout
-                            VStack(spacing: 36) {
-                                Text("Hey bestie! 🦄✨")
-                                    .font(.system(size: 28, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 2)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 8)
-                                Text("Swipe Photo needs access to your photos to help you clean your camera roll. 📸🧼")
-                                    .font(.system(size: 18, weight: .regular))
-                                    .foregroundColor(.white)
-                                    .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 2)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 8)
-                                Image("camera-permissions")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxWidth: 340, maxHeight: 220)
-                                    .shadow(color: .black.opacity(0.18), radius: 16, x: 0, y: 6)
-                                    .padding(.vertical, 16)
-                                PulsingButton(
-                                    title: "Open Settings",
-                                    subtitle: "",
-                                    gradient: LinearGradient(
-                                        gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    action: {
-                                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                                            UIApplication.shared.open(url)
-                                        }
-                                    },
-                                    disabled: false
-                                )
-                                .frame(height: 72)
-                                .frame(maxWidth: .infinity)
-                                .padding(.horizontal, 0)
-                                .padding(.bottom, 0)
-                                .shadow(color: Color.black.opacity(0.28), radius: 14, x: 0, y: 7)
-                                .shadow(color: Color.yellow.opacity(0.18), radius: 10, x: 0, y: 3)
-                            }
-                            .padding(.horizontal, 28)
-                            .padding(.vertical, 32)
-                            Spacer(minLength: 0)
-                        }
+                    if photoManager.authorizationStatus != .authorized && photoManager.authorizationStatus != .limited {
+                        PermissionsPrompt()
                     } else if !photoManager.isLoading && photoManager.photoMonths.isEmpty {
-                        VStack(spacing: 12) {
-                            Text("No Photos Found")
-                                .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(.white)
-                            Text("Your photo library is empty. Add some photos to get started!")
-                                .font(.system(size: 18, weight: .regular))
-                                .foregroundColor(.white.opacity(0.8))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        EmptyStateView()
                     } else {
-                        //                        Button("Show Paywall (Test)") { showPaywall = true }
-                        //                            .padding(.bottom, 8)
-                    ScrollView {
-                        ScrollOffsetReader()
-                            .frame(height: 0)
-                        let columns: [GridItem] = [
-                                GridItem(.adaptive(minimum: UIScreen.main.bounds.width > 600 ? 220 : 160, maximum: UIScreen.main.bounds.width > 600 ? 260 : 200), spacing: 18)
-                            ]
-                            LazyVGrid(columns: columns, spacing: 28) {
-                                if photoManager.isLoading {
-                                    ForEach(0..<10, id: \.self) { index in
-                                        ShimmerAlbumCard(gradient: rainbowGradients[index % rainbowGradients.count])
-                                    }
-                                } else {
-                                    ForEach(Array(menuItems.enumerated()), id: \.element.id) { index, item in
-                                        MenuCardView(item: item, recentsCount: item.month?.assets.count ?? 0, gradient: rainbowGradients[index % rainbowGradients.count]) {
-                                    if let month = item.month, !month.assets.isEmpty {
-                                                if month.status == .completed {
-                                                    monthToReviewAgain = month
-                                                    showReviewAgainTray = true
-                                                } else if isPremium || (totalSwipes < 3 && !hasSeenPaywall) {
-                                        selectedMonth = month
-                                                } else {
-                                                    showPaywall = true
+                        ZStack(alignment: .top) {
+                            ScrollView {
+                                VStack(spacing: 0) {
+                                    Header(showSettings: $showSettings, showFAQ: $showFAQ)
+                                        //.padding(.top, safeArea.top)
+                                    
+                                    LazyVGrid(columns: columns, spacing: 28) {
+                                        if photoManager.isLoading && photoManager.photoMonths.isEmpty {
+                                            ForEach(0..<10, id: \.self) { index in
+                                                ShimmerAlbumCard(gradient: rainbowGradients[index % rainbowGradients.count])
+                                            }
+                                        } else {
+                                            ForEach(Array(menuItems.enumerated()), id: \.element.id) { index, item in
+                                                MenuCardView(item: item, recentsCount: item.month?.assets.count ?? 0, gradient: rainbowGradients[index % rainbowGradients.count]) {
+                                                    if let month = item.month, !month.assets.isEmpty {
+                                                        if month.status == .completed {
+                                                            monthToReviewAgain = month
+                                                            showReviewAgainTray = true
+                                                        } else if isPremium || (totalSwipes < 3 && !hasSeenPaywall) {
+                                                            selectedMonth = month
+                                                        } else {
+                                                            showPaywall = true
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
+                                    }
+                                    .padding(.vertical, 24)
+                                    .padding(.horizontal, 14)
                                 }
                             }
-                        }
-                        .padding(.vertical, 24)
-                            .padding(.horizontal, 14)
-                    }
-                    .onPreferenceChange(ScrollOffsetKey.self) { value in
-                        let delta = value - lastOffset
-                        if abs(delta) > 6 {
-                            if delta < 0 {
-                                headerHidden = true
-                            } else if delta > 0 {
-                                headerHidden = false
-                            }
-                            lastOffset = value
-                        }
-                    }
-                        .sheet(item: $selectedMonth, onDismiss: {
-                            if let month = selectedMonth {
-                                let statusString = UserDefaults.standard.string(forKey: month.statusKey) ?? "notStarted"
-                                let status = AlbumStatus(rawValue: statusString) ?? .notStarted
-                                photoManager.updateStatus(for: month.month, year: month.year, status: status)
-                            }
-                        }) { month in
-                        PhotoSwipeView(month: month, onBatchDelete: {
-                                let statusString = UserDefaults.standard.string(forKey: month.statusKey) ?? "notStarted"
-                                let status = AlbumStatus(rawValue: statusString) ?? .notStarted
-                                photoManager.updateStatus(for: month.month, year: month.year, status: status)
-                            }, photoManager: photoManager)
-                        }
-                        .confirmationDialog("This album is already done. Review again?", isPresented: $showReviewAgainTray, titleVisibility: .visible) {
-                            Button("Review Again", role: .destructive) {
-                                if let month = monthToReviewAgain {
-                                    UserDefaults.standard.setValue("inProgress", forKey: month.statusKey)
-                                    UserDefaults.standard.removeObject(forKey: "albumProgress-\(month.month)-\(month.year)")
-                                    photoManager.updateStatus(for: month.month, year: month.year, status: .inProgress)
-                                    selectedMonth = month
-                                }
-                            }
-                            Button("Cancel", role: .cancel) {}
+                            
+                            // Subtle dark gradient overlay at the top
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.black.opacity(0.8),
+                                    Color.black.opacity(0.5),
+                                    Color.clear
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(height: 50)
+                            .ignoresSafeArea(edges: .top)
+                            .allowsHitTesting(false)
                         }
                     }
-                }
-                }
-                .onAppear {
-                    photoManager.objectWillChange.send()
                 }
             }
             .sheet(isPresented: $showPaywall) {
@@ -249,11 +117,36 @@ struct HomeView: View {
                     totalSwipes = 0
                     hasSeenPaywall = false
                 })
-        }
-        .fullScreenCover(isPresented: $showOnboarding) {
-            OnboardingView {
-                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                showOnboarding = false
+            }
+            .fullScreenCover(isPresented: $showOnboarding) {
+                OnboardingView {
+                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                    showOnboarding = false
+                }
+            }
+            .sheet(item: $selectedMonth) { month in
+                PhotoSwipeView(month: month, onBatchDelete: {
+                    // This closure might be empty if not needed, or can contain refresh logic
+                }, photoManager: photoManager)
+            }
+            .confirmationDialog("This album is already done. Review again?", isPresented: $showReviewAgainTray, titleVisibility: .visible) {
+                Button("Review Again", role: .destructive) {
+                    if let month = monthToReviewAgain {
+                        UserDefaults.standard.setValue("inProgress", forKey: month.statusKey)
+                        UserDefaults.standard.removeObject(forKey: "albumProgress-\(month.month)-\(month.year)")
+                        photoManager.updateStatus(for: month.month, year: month.year, status: .inProgress)
+                        isReadyToReviewMonth = true
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            }
+            .onChange(of: isReadyToReviewMonth) { shouldReview in
+                if shouldReview {
+                    DispatchQueue.main.async {
+                        selectedMonth = monthToReviewAgain
+                        isReadyToReviewMonth = false
+                    }
+                }
             }
         }
     }
@@ -395,47 +288,158 @@ struct HomeView: View {
         )
     }
         
-        func gradientForMonth(_ title: String) -> LinearGradient {
-            let upper = title.uppercased()
-            if upper.contains("FEB") {
-                // Red/Pink
-                return LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.56, blue: 0.56), Color(red: 1.0, green: 0.74, blue: 0.83)]), startPoint: .topLeading, endPoint: .bottomTrailing)
-            } else if upper.contains("MAR") {
-                // Orange
-                return LinearGradient(gradient: Gradient(colors: [Color.orange, Color.yellow]), startPoint: .topLeading, endPoint: .bottomTrailing)
-            } else if upper.contains("APR") {
-                // Yellow
-                return LinearGradient(gradient: Gradient(colors: [Color.yellow, Color(red: 1.0, green: 0.95, blue: 0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)
-            } else if upper.contains("MAY") {
-                // Green
-                return LinearGradient(gradient: Gradient(colors: [Color.green, Color(red: 0.36, green: 0.98, blue: 0.56)]), startPoint: .topLeading, endPoint: .bottomTrailing)
-            } else if upper.contains("JUN") {
-                // Blue
-                return LinearGradient(gradient: Gradient(colors: [Color.blue, Color(red: 0.36, green: 0.67, blue: 1.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)
-            } else if upper.contains("JAN") {
-                // Purple/Blue
-                return LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing)
-            } else {
-                // Default
-                return LinearGradient(gradient: Gradient(colors: [Color.pink, Color.orange]), startPoint: .topLeading, endPoint: .bottomTrailing)
-            }
+    func gradientForMonth(_ title: String) -> LinearGradient {
+        let upper = title.uppercased()
+        if upper.contains("FEB") {
+            // Red/Pink
+            return LinearGradient(gradient: Gradient(colors: [Color(red: 1.0, green: 0.56, blue: 0.56), Color(red: 1.0, green: 0.74, blue: 0.83)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("MAR") {
+            // Orange
+            return LinearGradient(gradient: Gradient(colors: [Color.orange, Color.yellow]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("APR") {
+            // Yellow
+            return LinearGradient(gradient: Gradient(colors: [Color.yellow, Color(red: 1.0, green: 0.95, blue: 0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("MAY") {
+            // Green
+            return LinearGradient(gradient: Gradient(colors: [Color.green, Color(red: 0.36, green: 0.98, blue: 0.56)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("JUN") {
+            // Blue
+            return LinearGradient(gradient: Gradient(colors: [Color.blue, Color(red: 0.36, green: 0.67, blue: 1.0)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else if upper.contains("JAN") {
+            // Purple/Blue
+            return LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else {
+            // Default
+            return LinearGradient(gradient: Gradient(colors: [Color.pink, Color.orange]), startPoint: .topLeading, endPoint: .bottomTrailing)
         }
-        
-        func emojiForMonth(_ title: String) -> String {
-            let upper = title.uppercased()
-            if upper.contains("JAN") { return "❄️" }
-            if upper.contains("FEB") { return "💖" }
-            if upper.contains("MAR") { return "🍀" }
-            if upper.contains("APR") { return "🐣" }
-            if upper.contains("MAY") { return "🌺" }
-            if upper.contains("JUN") { return "🏳️‍🌈" }
-            if upper.contains("JUL") { return "🇺🇸" }
-            if upper.contains("AUG") { return "⛱️" }
-            if upper.contains("SEP") { return "🍁" }
-            if upper.contains("OCT") { return "🎃" }
-            if upper.contains("NOV") { return "🦃" }
-            if upper.contains("DEC") { return "🎅" }
-            return "📅"
+    }
+    
+    func emojiForMonth(_ title: String) -> String {
+        let upper = title.uppercased()
+        if upper.contains("JAN") { return "❄️" }
+        if upper.contains("FEB") { return "💖" }
+        if upper.contains("MAR") { return "🍀" }
+        if upper.contains("APR") { return "🐣" }
+        if upper.contains("MAY") { return "🌺" }
+        if upper.contains("JUN") { return "🏳️‍🌈" }
+        if upper.contains("JUL") { return "🇺🇸" }
+        if upper.contains("AUG") { return "⛱️" }
+        if upper.contains("SEP") { return "🍁" }
+        if upper.contains("OCT") { return "🎃" }
+        if upper.contains("NOV") { return "🦃" }
+        if upper.contains("DEC") { return "🎅" }
+        return "📅"
+    }
+}
+
+struct Header: View {
+    @Binding var showSettings: Bool
+    @Binding var showFAQ: Bool
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .center) {
+                Button(action: { showFAQ = true }) {
+                    Image(systemName: "questionmark.circle")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
+                        .clipShape(Circle())
+                        .shadow(radius: 2, y: 1)
+                }
+                .sheet(isPresented: $showFAQ) { SettingsFAQView() }
+                
+                Spacer()
+                Text("Swipe Photo")
+                    .font(.system(size: 30, weight: .semibold))
+                    .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.18), radius: 3, x: 0, y: 2)
+                Spacer()
+                
+                Button(action: { showSettings = true }) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark))
+                        .clipShape(Circle())
+                        .shadow(radius: 2, y: 1)
+                }
+                .sheet(isPresented: $showSettings) { SettingsMainView() }
+            }
+            .padding(.horizontal, 14)
+            .frame(height: 80)
+            
+            Divider()
+                .frame(height: 1)
+                .background(Color.white.opacity(0.09))
+        }
+    }
+}
+
+struct PermissionsPrompt: View {
+    var body: some View {
+        VStack(spacing: 36) {
+            Text("Hey bestie! 🦄✨")
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundColor(.white)
+                .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 2)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 8)
+            Text("Swipe Photo needs access to your photos to help you clean your camera roll. 📸🧼")
+                .font(.system(size: 18, weight: .regular))
+                .foregroundColor(.white)
+                .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 2)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 8)
+            Image("camera-permissions")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: 340, maxHeight: 220)
+                .shadow(color: .black.opacity(0.18), radius: 16, x: 0, y: 6)
+                .padding(.vertical, 16)
+            PulsingButton(
+                title: "Open Settings",
+                subtitle: "",
+                gradient: LinearGradient(
+                    gradient: Gradient(colors: [Color(red:1.0, green:0.0, blue:0.6), Color.yellow, Color(red:0.0, green:0.6, blue:1.0)]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                action: {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                },
+                disabled: false
+            )
+            .frame(height: 72)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 0)
+            .padding(.bottom, 0)
+            .shadow(color: Color.black.opacity(0.28), radius: 14, x: 0, y: 7)
+            .shadow(color: .yellow.opacity(0.18), radius: 10, x: 0, y: 3)
+        }
+        .padding(.horizontal, 28)
+        .padding(.vertical, 32)
+        Spacer()
+    }
+}
+
+struct EmptyStateView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("No Photos Found")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.white)
+            Text("Your photo library is empty. Add some photos to get started!")
+                .font(.system(size: 18, weight: .regular))
+                .foregroundColor(.white.opacity(0.8))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -974,5 +978,6 @@ struct PolaroidThumbnail: View {
             return path
         }
     }
+
 
 

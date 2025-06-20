@@ -243,12 +243,12 @@ struct PhotoSwipeView: View {
                     Color.black.opacity(0.38).ignoresSafeArea() // Slightly stronger overlay for contrast
                     VStack(spacing: 24) {
                         Spacer(minLength: 40)
-                        WebImage(url: URL(string: "https://media.giphy.com/media/3oz8xAFtqoOUUrsh7W/giphy.gif"))
-                            .resizable()
-                            .indicator(.activity)
-                            .scaledToFit()
-                            .frame(maxWidth: 220, maxHeight: 120)
-                            .clipped()
+//                        WebImage(url: URL(string: "https://media.giphy.com/media/3oz8xAFtqoOUUrsh7W/giphy.gif"))
+//                            .resizable()
+//                            .indicator(.activity)
+//                            .scaledToFit()
+//                            .frame(maxWidth: 220, maxHeight: 120)
+//                            .clipped()
                         Text("\(month.title) complete!")
                             .font(.system(size: 28, weight: .semibold))
                             .foregroundColor(.white)
