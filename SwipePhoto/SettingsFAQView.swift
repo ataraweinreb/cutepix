@@ -12,25 +12,25 @@ struct SettingsFAQView: View {
     @Environment(\.presentationMode) var presentationMode
     let faqCards: [FAQCard] = [
         FAQCard(
-            memeUrl: "https://media.giphy.com/media/3o7aTvhUAeRLAVx8vm/giphy.gif",
-            question: "Who built this app?",
-            answer: "Just a girl like you who loves Taylor Swift, pink, and sparkles ✨"
-        ),
-        FAQCard(
-            memeUrl: "https://media.giphy.com/media/3o7aTvhUAeRLAVx8vm/giphy.gif",
+            memeUrl: "https://media.giphy.com/media/leqmpruKOh3gY/giphy.gif",
             question: "Are my photos safe?",
-            answer: "100% — they never leave your phone."
+            answer: "100% — they are safe and private. They never leave your phone!"
         ),
         FAQCard(
-            memeUrl: "https://media.giphy.com/media/TydZAW0DVCbGE/giphy.gif",
-            question: "Is it safe to use Swipe Photo?",
-            answer: "Absolutely! We never upload your photos. All the magic happens on your device."
+            memeUrl: "https://media.giphy.com/media/lBASzaum4ZhQc/giphy.gif",
+            question: "Will you sell my data?",
+            answer: "Nope. Unlike other competitor apps, we DO NOT sell your data ever"
         ),
         FAQCard(
-            memeUrl: "https://media.giphy.com/media/ydttw7Bg2tHVHecInE/giphy.gif",
+            memeUrl: "https://media.giphy.com/media/RqNxByluVjhu0nW0zY/giphy.gif",
+            question: "Who built this app?",
+            answer: "Just an ordinary girl who loves Taylor Swift, pink, and sparkles ✨"
+        ),
+        FAQCard(
+            memeUrl: "https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif",
             question: "How do I unsubscribe?",
-            answer: "Tap 'Manage Subscription' below."
-        )
+            answer: "Go into Settings > Apple Account > Subscriptions, and then tap 'Cancel Subscription.' We'll miss you!"
+        ),
     ]
     @State private var currentIndex = 0
     @State private var offset: CGSize = .zero
