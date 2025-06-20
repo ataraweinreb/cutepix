@@ -65,9 +65,9 @@ class PhotoManager: ObservableObject {
         
         assets.enumerateObjects { asset, _, _ in
                 guard let asset = asset as? PHAsset else { return }
-            guard let date = asset.creationDate else { return }
-            let comps = Calendar.current.dateComponents([.year, .month], from: date)
-            let key = "\(comps.year!)-\(comps.month!)"
+                guard let date = asset.creationDate else { return }
+                let comps = Calendar.current.dateComponents([.year, .month], from: date)
+                let key = "\(comps.year!)-\(comps.month!)"
                 if key != currentMonthKey {
                     appendCurrentMonthIfNeeded()
                     currentMonthKey = key

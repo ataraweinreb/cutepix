@@ -604,9 +604,20 @@ struct PhotoCard: View {
                         .background(Color.black)
                         .shadow(radius: 10)
                 } else {
-                    Color.gray
-                        .frame(width: geo.size.width, height: geo.size.height)
+                    ZStack {
+                        Color.black
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(1.5)
+                            Text("Loading...")
+                                .font(.custom("Poppins-Regular", size: 16))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .frame(width: geo.size.width, height: geo.size.height)
                 }
+
                 if let overlayText = overlayText {
                     Text(overlayText)
                         .font(.system(size: 48, weight: .bold))
@@ -631,10 +642,22 @@ struct PhotoCard: View {
         let manager = PHImageManager.default()
         let options = PHImageRequestOptions()
         options.deliveryMode = .opportunistic
-        options.isSynchronous = false
         options.isNetworkAccessAllowed = true
-        manager.requestImage(for: asset, targetSize: CGSize(width: 600, height: 600), contentMode: .aspectFit, options: options) { img, _ in
-            self.image = img
+        
+        // Use a high-quality large size
+        let targetSize = CGSize(width: 800, height: 800)
+        
+        manager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options) { img, info in
+            DispatchQueue.main.async {
+                if let img = img {
+                    self.image = img
+                } else {
+                    print("PhotoCard: Failed to load image for asset: \(asset.localIdentifier)")
+                    if let error = info?[PHImageErrorKey] as? Error {
+                        print("PhotoCard Error: \(error.localizedDescription)")
+                    }
+                }
+            }
         }
     }
 }

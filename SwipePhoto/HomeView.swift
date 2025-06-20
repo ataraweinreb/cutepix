@@ -649,8 +649,14 @@ struct PolaroidThumbnail: View {
                             .frame(width: size * 0.82, height: size * 0.82)
                             .clipped()
                     } else {
-                        Color.gray
-                            .frame(width: size * 0.82, height: size * 0.82)
+                        // Gray placeholder with a photo icon
+                        ZStack {
+                            Color(white: 0.95)
+                            Image(systemName: "photo")
+                                .foregroundColor(Color(white: 0.8))
+                                .font(.system(size: size * 0.3))
+                        }
+                        .frame(width: size * 0.82, height: size * 0.82)
                     }
                 }
                 .background(Color.white)
@@ -661,8 +667,6 @@ struct PolaroidThumbnail: View {
             .background(
                 ZStack {
                     Color.white
-                    // Optional: subtle dot pattern overlay for texture
-                    // If you want a texture, you could use an overlay image here
                 }
             )
             .overlay(
@@ -683,17 +687,32 @@ struct PolaroidThumbnail: View {
         }
         .aspectRatio(1, contentMode: .fit)
         .onAppear {
-            let manager = PHImageManager.default()
-            let options = PHImageRequestOptions()
-            options.deliveryMode = .fastFormat
-            options.isSynchronous = false
-            options.resizeMode = .fast
-            manager.requestImage(for: asset, targetSize: CGSize(width: size, height: size), contentMode: .aspectFill, options: options) { img, _ in
-                self.image = img
+            loadImage()
+        }
+    }
+
+    private func loadImage() {
+        let manager = PHImageManager.default()
+        let options = PHImageRequestOptions()
+        options.isNetworkAccessAllowed = true
+        
+        // Request a slightly larger image for better quality
+        let targetSize = CGSize(width: size * 2.5, height: size * 2.5)
+
+        manager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFill, options: options) { image, info in
+            DispatchQueue.main.async {
+                if let image = image {
+                    self.image = image
+                } else {
+                    print("PolaroidThumbnail: Failed to load image for asset \(asset.localIdentifier)")
+                    if let error = info?[PHImageErrorKey] as? Error {
+                        print("PolaroidThumbnail Error: \(error.localizedDescription)")
+                    }
+                }
             }
         }
     }
-} 
+}
     
     struct ShimmerAlbumCard: View {
         var gradient: LinearGradient
