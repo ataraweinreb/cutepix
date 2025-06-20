@@ -23,7 +23,7 @@ struct SettingsFAQView: View {
         ),
         FAQCard(
             memeUrl: "https://media.giphy.com/media/TydZAW0DVCbGE/giphy.gif",
-            question: "Is it safe to use Color Clean?",
+            question: "Is it safe to use Swipe Photo?",
             answer: "Absolutely! We never upload your photos. All the magic happens on your device."
         ),
         FAQCard(
@@ -69,7 +69,7 @@ struct SettingsFAQView: View {
                         Spacer()
                     }
                     Text("Swipe for FAQ")
-                        .font(.custom("Poppins-SemiBold", size: 32))
+                        .font(.system(size: 32, weight: .semibold))
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
                         .multilineTextAlignment(.center)
@@ -237,17 +237,17 @@ struct FAQPolaroidCard: View {
                 Spacer().frame(height: 32)
             }
             Text(card.question)
-                .font(.custom("Poppins-SemiBold", size: max(20, cardWidth * 0.065)))
-                .foregroundColor(.black)
+                .font(.system(size: max(20, cardWidth * 0.065), weight: .semibold))
+                .foregroundColor(Color.black.opacity(0.8))
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 16)
+                .padding(.top, 20)
+                .padding(.bottom, 12)
             Text(card.answer)
-                .font(.custom("Poppins-Regular", size: max(16, cardWidth * 0.055)))
-                .foregroundColor(.black)
+                .font(.system(size: max(16, cardWidth * 0.055), weight: .regular))
+                .foregroundColor(Color.black.opacity(0.7))
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 18)
                 .padding(.vertical, 14)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 18)

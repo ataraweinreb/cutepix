@@ -82,11 +82,10 @@ struct HomeView: View {
                             SettingsFAQView()
                         }
                         Spacer()
-                        Text("Color Clean")
-                            .font(.custom("Poppins-SemiBold", size: 32))
+                        Text("Swipe Photo")
+                            .font(.system(size: 30, weight: .semibold))
                             .foregroundColor(.white)
-                            .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
-                            .multilineTextAlignment(.center)
+                            .shadow(color: .black.opacity(0.18), radius: 3, x: 0, y: 2)
                         Spacer()
                         Button(action: { showSettings = true }) {
                             Image(systemName: "gearshape")
@@ -112,13 +111,13 @@ struct HomeView: View {
                             Color.clear // for layout
                             VStack(spacing: 36) {
                                 Text("Hey bestie! 🦄✨")
-                                    .font(.custom("Poppins-SemiBold", size: 28))
+                                    .font(.system(size: 28, weight: .semibold))
                                     .foregroundColor(.white)
                                     .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 2)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 8)
-                                Text("Color Clean needs access to your photos to help you clean your camera roll. 📸🧼")
-                                    .font(.custom("Poppins-Regular", size: 18))
+                                Text("Swipe Photo needs access to your photos to help you clean your camera roll. 📸🧼")
+                                    .font(.system(size: 18, weight: .regular))
                                     .foregroundColor(.white)
                                     .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 2)
                                     .multilineTextAlignment(.center)
@@ -155,6 +154,18 @@ struct HomeView: View {
                             .padding(.vertical, 32)
                             Spacer(minLength: 0)
                         }
+                    } else if !photoManager.isLoading && photoManager.photoMonths.isEmpty {
+                        VStack(spacing: 12) {
+                            Text("No Photos Found")
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("Your photo library is empty. Add some photos to get started!")
+                                .font(.system(size: 18, weight: .regular))
+                                .foregroundColor(.white.opacity(0.8))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         //                        Button("Show Paywall (Test)") { showPaywall = true }
                         //                            .padding(.bottom, 8)
@@ -165,12 +176,12 @@ struct HomeView: View {
                                 GridItem(.adaptive(minimum: UIScreen.main.bounds.width > 600 ? 220 : 160, maximum: UIScreen.main.bounds.width > 600 ? 260 : 200), spacing: 18)
                             ]
                             LazyVGrid(columns: columns, spacing: 28) {
-                                if photoManager.isLoading && photoManager.photoMonths.isEmpty {
-                                    ForEach(0..<10, id: \ .self) { index in
+                                if photoManager.isLoading {
+                                    ForEach(0..<10, id: \.self) { index in
                                         ShimmerAlbumCard(gradient: rainbowGradients[index % rainbowGradients.count])
                                     }
                                 } else {
-                                    ForEach(Array(menuItems.enumerated()), id: \ .element.id) { index, item in
+                                    ForEach(Array(menuItems.enumerated()), id: \.element.id) { index, item in
                                         MenuCardView(item: item, recentsCount: item.month?.assets.count ?? 0, gradient: rainbowGradients[index % rainbowGradients.count]) {
                                     if let month = item.month, !month.assets.isEmpty {
                                                 if month.status == .completed {
@@ -485,7 +496,7 @@ struct MenuCardView: View {
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
                                 Text(capitalizeFirst(item.title))
-                                    .font(.custom("Poppins-SemiBold", size: size * 0.14))
+                                    .font(.system(size: size * 0.14, weight: .semibold))
                                     .foregroundColor(.white)
                                     .shadow(color: .black.opacity(0.7), radius: 3, x: 0, y: 1)
                                     .lineLimit(1)
@@ -520,14 +531,14 @@ struct MenuCardView: View {
                                     .padding(.top, size * 0.01)
                                 case .notStarted:
                     Text("\(recentsCount) photos")
-                                        .font(.custom("Poppins-Medium", size: size * 0.10))
+                                        .font(.system(size: size * 0.10, weight: .medium))
                                         .foregroundColor(.white)
                                         .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
                         .lineLimit(1)
                                 }
                             } else {
                                 Text("\(recentsCount) photos")
-                                    .font(.custom("Poppins-Medium", size: size * 0.10))
+                                    .font(.system(size: size * 0.10, weight: .medium))
                                     .foregroundColor(.white)
                                     .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
                             .lineLimit(1)
@@ -882,7 +893,7 @@ struct PolaroidThumbnail: View {
                     .cornerRadius(width * 0.03, corners: [.bottomLeft, .bottomRight])
                 // Caption
                 Text(caption)
-                    .font(.custom("Poppins-Regular", size: max(10, width * 0.10)))
+                    .font(.system(size: max(10, width * 0.10), weight: .regular))
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 6)
@@ -932,7 +943,7 @@ struct PolaroidThumbnail: View {
                         .offset(x: 0, y: 0)
                         .animation(Animation.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: animate)
                     Text("swipe me! ⤵️")
-                        .font(.custom("Poppins-Regular", size: 20))
+                        .font(.system(size: 20, weight: .regular))
                         .foregroundColor(.purple)
                         .offset(x: 50, y: 18)
                         .rotationEffect(.degrees(10))

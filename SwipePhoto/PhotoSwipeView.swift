@@ -43,7 +43,7 @@ struct PhotoSwipeView: View {
                                 .foregroundColor(.white)
                         }
                         Text(month.title)
-                            .font(.custom("Poppins-SemiBold", size: 24))
+                            .font(.system(size: 24, weight: .semibold))
                             .foregroundColor(.white)
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
@@ -71,7 +71,7 @@ struct PhotoSwipeView: View {
                             .disabled(currentIndex == 0 || swipeHistory.isEmpty)
                             Text("\(min(currentIndex+1, month.assets.count))/\(month.assets.count)")
                                 .foregroundColor(.white)
-                                .font(.custom("Poppins-Regular", size: 16))
+                                .font(.system(size: 16, weight: .regular))
                         }
                     }
                     .padding(.horizontal, 12)
@@ -86,7 +86,7 @@ struct PhotoSwipeView: View {
                                 .scaleEffect(2)
                             Text("Deleting photos...")
                                 .foregroundColor(.white)
-                                .font(.custom("Poppins-Regular", size: 20))
+                                .font(.system(size: 20, weight: .regular))
                                 .lineLimit(nil)
                                 .minimumScaleFactor(0.7)
                         }
@@ -250,14 +250,14 @@ struct PhotoSwipeView: View {
                             .frame(maxWidth: 220, maxHeight: 120)
                             .clipped()
                         Text("\(month.title) complete!")
-                            .font(.custom("Poppins-SemiBold", size: 28))
+                            .font(.system(size: 28, weight: .semibold))
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
                             .shadow(color: .black.opacity(0.95), radius: 8, x: 0, y: 4)
                             .padding(.top, 24)
                         
                         Text("Nice work bestie, you're the GOAT 🐐")
-                            .font(.custom("Poppins-Regular", size: 20))
+                            .font(.system(size: 20, weight: .regular))
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
                             .shadow(color: .black.opacity(0.95), radius: 6, x: 0, y: 2)
@@ -295,7 +295,7 @@ struct PhotoSwipeView: View {
                             }
                         }) {
                             Text("Return to Home")
-                                .font(.custom("Poppins-SemiBold", size: 22))
+                                .font(.system(size: 22, weight: .semibold))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 18)
@@ -515,10 +515,10 @@ struct CounterCircle: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(label)
-                .font(.custom("Poppins-Bold", size: 20))
+                .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
             Text("\(count)")
-                .font(.custom("Poppins-Bold", size: 32))
+                .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.white)
         }
         .frame(width: 90, height: 90)
@@ -611,7 +611,7 @@ struct PhotoCard: View {
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 .scaleEffect(1.5)
                             Text("Loading...")
-                                .font(.custom("Poppins-Regular", size: 16))
+                                .font(.system(size: 16, weight: .regular))
                                 .foregroundColor(.white)
                         }
                     }

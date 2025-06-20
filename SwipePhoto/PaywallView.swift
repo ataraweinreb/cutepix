@@ -50,13 +50,13 @@ struct PaywallView: View {
                     
                     VStack(spacing: 12) {
                         Text("Unlock Premium 👑")
-                            .font(.custom("Poppins-SemiBold", size: 32))
+                            .font(.system(size: 32, weight: .semibold))
                             .foregroundColor(.white)
                             .shadow(color: .black.opacity(0.85), radius: 5, x: 0, y: 2)
                             .multilineTextAlignment(.center)
                             .padding(.top, 54)
                         Text("Get unlimited swipes and deletes")
-                            .font(.custom("Poppins-Medium", size: 20))
+                            .font(.system(size: 20, weight: .medium))
                             .foregroundColor(.white)
                             .shadow(color: .black.opacity(0.8), radius: 4, x: 0, y: 1)
                             .multilineTextAlignment(.center)
@@ -68,7 +68,7 @@ struct PaywallView: View {
                             .foregroundColor(Color.purple)
                             .font(.system(size: 18))
                         Text("Auto-renewable. Cancel anytime.")
-                            .font(.custom("Poppins-Regular", size: 15))
+                            .font(.system(size: 15, weight: .regular))
                             .foregroundColor(.white)
                             .shadow(color: .black.opacity(0.85), radius: 2, x: 0, y: 1)
                             .lineLimit(1)
@@ -120,14 +120,14 @@ struct PaywallView: View {
                     }
                     VStack(alignment: .leading, spacing: 18) {
                         Text("What makes us different?")
-                            .font(.custom("Poppins-Medium", size: 20))
+                            .font(.system(size: 20, weight: .medium))
                             .foregroundColor(.white)
                             .shadow(color: .black.opacity(0.85), radius: 4, x: 0, y: 1)
                         HStack(alignment: .top, spacing: 10) {
                             Text("💖")
                                 .font(.system(size: 22))
                             Text("Your photos are 100% private and stay on your device only")
-                                .font(.custom("Poppins-Regular", size: 16))
+                                .font(.system(size: 16, weight: .regular))
                                 .foregroundColor(.white)
                                 .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
                         }
@@ -135,7 +135,7 @@ struct PaywallView: View {
                             Text("💜")
                                 .font(.system(size: 22))
                             Text("Affordable pricing")
-                                .font(.custom("Poppins-Regular", size: 16))
+                                .font(.system(size: 16, weight: .regular))
                                 .foregroundColor(.white)
                                 .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
                         }
@@ -143,7 +143,7 @@ struct PaywallView: View {
                             Text("💙")
                                 .font(.system(size: 22))
                             Text("Built by an all-women team!")
-                                .font(.custom("Poppins-Regular", size: 16))
+                                .font(.system(size: 16, weight: .regular))
                                 .foregroundColor(.white)
                                 .shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1)
                         }
@@ -293,7 +293,7 @@ struct PulsingButton: View {
         Button(action: action) {
             VStack(spacing: 2) {
                 Text(title)
-                    .font(.custom("Poppins-ExtraBold", size: 24))
+                    .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(1.0), radius: 6, x: 0, y: 2)
                     .shadow(color: .white.opacity(0.18), radius: 8, x: 0, y: 0)
@@ -303,7 +303,7 @@ struct PulsingButton: View {
                     .cornerRadius(18)
                     .shadow(color: Color.black.opacity(0.13), radius: 10, y: 5)
                 Text(subtitle)
-                    .font(.custom("Poppins-Regular", size: 14))
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.85), radius: 2, x: 0, y: 1)
                     .multilineTextAlignment(.center)

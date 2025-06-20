@@ -20,8 +20,8 @@ struct OnboardingView: View {
             VStack(spacing: 0) {
                 Spacer().frame(height: 44)
                 VStack(spacing: 30) {
-                    Text("Welcome to Color Clean! ✨")
-                        .font(.custom("Poppins-Bold", size: 32))
+                    Text("Welcome to Swipe Photo! ✨")
+                        .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.7), radius: 4, x: 0, y: 2)
                         .multilineTextAlignment(.center)
@@ -30,7 +30,7 @@ struct OnboardingView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 12)
                     Text("The playful, girly way to clean your camera roll 💖")
-                        .font(.custom("Poppins-SemiBold", size: 18))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white.opacity(0.95))
                         .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
                         .multilineTextAlignment(.center)
@@ -159,11 +159,11 @@ struct OnboardingPolaroidStack: View {
             // Handwritten 'swipe me' text with down arrow inline
             HStack(spacing: 8) {
                 Text("swipe me")
-                    .font(.custom("SnellRoundhand-Bold", size: 28, relativeTo: .title2))
+                    .font(.custom("SnellRoundhand-Bold", size: 28))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.7), radius: 3, x: 0, y: 2)
                 Text("↓")
-                    .font(.custom("SnellRoundhand-Bold", size: 32, relativeTo: .title2))
+                    .font(.custom("SnellRoundhand-Bold", size: 32))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.7), radius: 3, x: 0, y: 2)
             }
@@ -228,7 +228,7 @@ struct PolaroidCard: View {
                 .frame(width: 180, height: 110)
                 .clipped()
             Text(caption)
-                .font(.custom("Poppins-Regular", size: 18))
+                .font(.system(size: 18, weight: .regular))
                 .foregroundColor(.black)
                 .multilineTextAlignment(.center)
                 .padding(.vertical, 8)
