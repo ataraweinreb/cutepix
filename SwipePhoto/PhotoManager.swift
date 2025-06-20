@@ -7,20 +7,22 @@ class PhotoManager: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var loadingProgress: Double = 0.0 // (can be removed from UI)
     
+    // FAQ GIF URLs to preload
+    private let faqGifUrls = [
+        "https://media.giphy.com/media/leqmpruKOh3gY/giphy.gif",
+        "https://media.giphy.com/media/lBASzaum4ZhQc/giphy.gif",
+        "https://media.giphy.com/media/RqNxByluVjhu0nW0zY/giphy.gif",
+        "https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif"
+    ]
+    
     init() {
-        checkPermission()
+        // Request permissions immediately on app launch
+        requestPhotoPermissions()
+        preloadFAQGifs()
     }
     
-    func checkPermission() {
-        // Check current authorization status first
-        let currentStatus = PHPhotoLibrary.authorizationStatus()
-        if currentStatus == .authorized || currentStatus == .limited {
-            self.authorizationStatus = currentStatus
-            self.fetchPhotos()
-            return
-        }
-        
-        // If not authorized, request authorization
+    // Request photo permissions immediately
+    func requestPhotoPermissions() {
         PHPhotoLibrary.requestAuthorization { [weak self] status in
             guard let self = self else { return }
             
@@ -29,6 +31,17 @@ class PhotoManager: ObservableObject {
                 if status == .authorized || status == .limited {
                     self.fetchPhotos()
                 }
+            }
+        }
+    }
+    
+    // Check current permission status (for UI state)
+    func checkPermission() {
+        let currentStatus = PHPhotoLibrary.authorizationStatus()
+        DispatchQueue.main.async {
+            self.authorizationStatus = currentStatus
+            if currentStatus == .authorized || currentStatus == .limited {
+                self.fetchPhotos()
             }
         }
     }
@@ -96,6 +109,27 @@ class PhotoManager: ObservableObject {
     func updateStatus(for month: Int, year: Int, status: AlbumStatus) {
         if let index = photoMonths.firstIndex(where: { $0.month == month && $0.year == year }) {
             photoMonths[index].status = status
+        }
+    }
+    
+    // Preload FAQ GIFs in the background
+    private func preloadFAQGifs() {
+        DispatchQueue.global(qos: .utility).async {
+            for urlString in self.faqGifUrls {
+                guard let url = URL(string: urlString) else { continue }
+                
+                // Use URLSession to preload the GIF data
+                let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                    if let data = data, error == nil {
+                        // Successfully loaded the GIF data
+                        // SDWebImage will cache this automatically when it's first displayed
+                        print("Preloaded FAQ GIF: \(urlString)")
+                    } else {
+                        print("Failed to preload FAQ GIF: \(urlString), error: \(error?.localizedDescription ?? "unknown")")
+                    }
+                }
+                task.resume()
+            }
         }
     }
 } 

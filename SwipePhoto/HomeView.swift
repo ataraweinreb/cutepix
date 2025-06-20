@@ -8,7 +8,6 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var photoManager: PhotoManager
     @State private var selectedMonth: PhotoMonth? = nil
-    @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
     @State private var showSettings = false
     @State private var showFAQ = false
     @State private var showReviewAgainTray = false
@@ -117,12 +116,6 @@ struct HomeView: View {
                     totalSwipes = 0
                     hasSeenPaywall = false
                 })
-            }
-            .fullScreenCover(isPresented: $showOnboarding) {
-                OnboardingView {
-                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                    showOnboarding = false
-                }
             }
             .sheet(item: $selectedMonth) { month in
                 PhotoSwipeView(month: month, onBatchDelete: {

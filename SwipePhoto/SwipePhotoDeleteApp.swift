@@ -15,11 +15,31 @@ struct SwipePhotoDeleteApp: App {
     
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            MainView()
                 .environmentObject(photoManager)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-                    photoManager.fetchPhotos()
+                    photoManager.checkPermission()
                 }
+        }
+    }
+}
+
+struct MainView: View {
+    @EnvironmentObject var photoManager: PhotoManager
+    @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+    
+    var body: some View {
+        Group {
+            if showOnboarding {
+                OnboardingView {
+                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                    showOnboarding = false
+                    // Check permissions after onboarding
+                    photoManager.checkPermission()
+                }
+            } else {
+                HomeView()
+            }
         }
     }
 } 
